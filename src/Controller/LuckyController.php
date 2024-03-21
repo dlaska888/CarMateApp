@@ -5,9 +5,10 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/api', name: 'api_')]
 class LuckyController
 {
-    #[Route('/lucky/number')]
+    #[Route('/lucky/number', name: 'lucky_number')]
     public function number(): Response
     {
         $number = random_int(0, 100);
