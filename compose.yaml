@@ -33,8 +33,6 @@ services:
       - target: 443
         published: ${HTTP3_PORT:-443}
         protocol: udp
-    links:
-      - database
     depends_on:
       - database
 
@@ -45,6 +43,8 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-app}
       # You should definitely change the password in production
