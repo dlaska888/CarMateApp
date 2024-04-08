@@ -9,6 +9,10 @@ class UserRegisterDto
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Email]
+        private ?string $username = null,
+        
+        #[Assert\NotBlank]
+        #[Assert\Email]
         private ?string $email = null,
 
         #[Assert\NotBlank]
@@ -35,5 +39,15 @@ class UserRegisterDto
     public function setPassword(string $password): void
     {
         $this->password = $password;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
     }
 }
