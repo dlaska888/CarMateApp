@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240410184932 extends AbstractMigration
+final class Version20240410200310 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,7 +21,7 @@ final class Version20240410184932 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SEQUENCE refresh_tokens_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
-        $this->addSql('CREATE TABLE car (id UUID NOT NULL, user_id UUID NOT NULL, photo_id UUID DEFAULT NULL, name VARCHAR(50) NOT NULL, model VARCHAR(255) DEFAULT NULL, brand VARCHAR(255) DEFAULT NULL, displacement INT DEFAULT NULL, production_date TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, mileage INT DEFAULT NULL, purchase_date TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, plate VARCHAR(255) DEFAULT NULL, vin VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE car (id UUID NOT NULL, user_id UUID NOT NULL, photo_id UUID DEFAULT NULL, name VARCHAR(50) NOT NULL, model VARCHAR(255) DEFAULT NULL, brand VARCHAR(255) DEFAULT NULL, displacement DOUBLE PRECISION DEFAULT NULL, production_date TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, mileage INT DEFAULT NULL, purchase_date TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, plate VARCHAR(255) DEFAULT NULL, vin VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_773DE69DA76ED395 ON car (user_id)');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_773DE69D7E9E4C8C ON car (photo_id)');
         $this->addSql('COMMENT ON COLUMN car.id IS \'(DC2Type:uuid)\'');

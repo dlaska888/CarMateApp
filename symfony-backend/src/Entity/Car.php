@@ -28,8 +28,8 @@ class Car
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $brand = null;
 
-    #[ORM\Column(type: "integer", nullable: true)]
-    private ?int $displacement = null;
+    #[ORM\Column(type: "float", nullable: true)]
+    private ?float $displacement = null;
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $productionDate = null;
