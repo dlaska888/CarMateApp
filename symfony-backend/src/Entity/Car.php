@@ -7,16 +7,19 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: CarRepository::class)]
 class Car
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: "IDENTITY")]
-    #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    private ?Uuid $id = null;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "string", length: 50)]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
@@ -28,13 +31,13 @@ class Car
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $displacement = null;
 
-    #[ORM\Column(type: "date", nullable: true)]
+    #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $productionDate = null;
 
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $mileage = null;
 
-    #[ORM\Column(type: "date", nullable: true)]
+    #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $purchaseDate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
@@ -54,20 +57,16 @@ class Car
     #[ORM\OneToMany(targetEntity: Maintenance::class, mappedBy: "car")]
     private Collection $maintenances;
 
-    #[ORM\OneToMany(targetEntity: CustomWork::class, mappedBy: "car")]
-    private Collection $customWorks;
-
     public function __construct()
     {
-        $this->customWorks = new ArrayCollection();
         $this->maintenances = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
-
+    
     public function getName(): ?string
     {
         return $this->name;
@@ -217,30 +216,4 @@ class Car
         return $this;
     }
 
-    public function getCustomWorks(): Collection
-    {
-        return $this->customWorks;
-    }
-
-    public function addCustomWork(CustomWork $customWork): self
-    {
-        if (!$this->customWorks->contains($customWork)) {
-            $this->customWorks[] = $customWork;
-            $customWork->setCar($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCustomWork(CustomWork $customWork): self
-    {
-        if ($this->customWorks->removeElement($customWork)) {
-            // set the owning side to null (unless already changed)
-            if ($customWork->getCar() === $this) {
-                $customWork->setCar(null);
-            }
-        }
-
-        return $this;
-    }
 }

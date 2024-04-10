@@ -4,19 +4,20 @@ namespace App\Entity;
 
 use App\Repository\MaintenanceRepository;
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: MaintenanceRepository::class)]
 class Maintenance
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: "IDENTITY")]
-    #[ORM\Column(type: "integer")]
-    private ?int $id = null;
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
+    private ?Uuid $id = null;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "string", length: 50)]
     private ?string $name = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
@@ -28,19 +29,14 @@ class Maintenance
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $dueDate = null;
 
+    #[ORM\Column(type: "decimal", nullable: true)]
+    private ?string $cost = null;
+
     #[ORM\ManyToOne(targetEntity: Car::class, inversedBy: "maintenances")]
     #[ORM\JoinColumn(nullable: false)]
     private ?Car $car;
 
-    #[ORM\OneToMany(targetEntity: MaintenanceWork::class, mappedBy: "maintenance")]
-    private Collection $maintenanceWorks;
-
-    public function __construct()
-    {
-        $this->maintenanceWorks = new ArrayCollection();
-    }
-
-    public function getId(): ?int
+    public function getId(): ?Uuid
     {
         return $this->id;
     }
@@ -93,6 +89,17 @@ class Maintenance
         return $this;
     }
 
+    public function getCost(): ?string
+    {
+        return $this->cost;
+    }
+
+    public function setCost(?string $cost): Maintenance
+    {
+        $this->cost = $cost;
+        return $this;
+    }
+
     public function getCar(): ?Car
     {
         return $this->car;
@@ -104,30 +111,5 @@ class Maintenance
         return $this;
     }
 
-    public function getMaintenanceWorks(): Collection
-    {
-        return $this->maintenanceWorks;
-    }
 
-    public function addMaintenanceWork(MaintenanceWork $maintenanceWork): self
-    {
-        if (!$this->maintenanceWorks->contains($maintenanceWork)) {
-            $this->maintenanceWorks[] = $maintenanceWork;
-            $maintenanceWork->setMaintenance($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMaintenanceWork(MaintenanceWork $maintenanceWork): self
-    {
-        if ($this->maintenanceWorks->removeElement($maintenanceWork)) {
-            // set the owning side to null (unless already changed)
-            if ($maintenanceWork->getMaintenance() === $this) {
-                $maintenanceWork->setMaintenance(null);
-            }
-        }
-
-        return $this;
-    }
 }

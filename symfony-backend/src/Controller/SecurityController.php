@@ -27,7 +27,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface      $entityManager,
         JWTTokenManagerInterface    $JWTManager,
-        AutoMapperInterface         $autoMapper
+        AutoMapperInterface         $autoMapper,
     )
     {
         $this->userPasswordHasher = $userPasswordHasher;
@@ -48,6 +48,14 @@ class SecurityController extends AbstractController
             throw new BadRequestException("User already exists");
         }
 
+        $find = $this->entityManager
+            ->getRepository(CarMateUser::class)
+            ->findBy(["username" => $registerDto->getUsername()]);
+
+        if ($find) {
+            throw new BadRequestException("User already exists");
+        }
+
         $user = $this->autoMapper->map($registerDto, CarMateUser::class);
         $user->setPassword(
             $this->userPasswordHasher->hashPassword(
@@ -58,16 +66,9 @@ class SecurityController extends AbstractController
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
-
+        
         $token = $this->JWTManager->create($user);
-
-        return new JsonResponse($token, Response::HTTP_CREATED);
-    }
-
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): JsonResponse
-    {
-        $user = $this->getUser();
-        return new JsonResponse($user->getUserIdentifier());
+        
+        return new JsonResponse(['token'=>$token], Response::HTTP_CREATED);
     }
 }

@@ -8,15 +8,16 @@ class UserRegisterDto
 {
     public function __construct(
         #[Assert\NotBlank]
-        #[Assert\Email]
+        #[Assert\Length(min: 3, max: 30)]
         private ?string $username = null,
         
         #[Assert\NotBlank]
         #[Assert\Email]
+        #[Assert\Length(max: 180)]
         private ?string $email = null,
 
         #[Assert\NotBlank]
-        #[Assert\Length(min: 6, max: 255)]
+        #[Assert\Length(min: 6, max: 128)]
         private ?string $password = null
     ) {
     }
