@@ -1,0 +1,144 @@
+<?php
+
+namespace App\Controller;
+
+use App\Dto\Maintenance\CreateMaintenanceDto;
+use App\Dto\Maintenance\GetMaintenanceDto;
+use App\Dto\Maintenance\UpdateMaintenanceDto;
+use App\Entity\Maintenance;
+use App\Repository\CarRepository;
+use App\Repository\MaintenanceRepository;
+use AutoMapperPlus\AutoMapperInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Uid\Uuid;
+
+#[Route('/api/cars/{carId}/maintenances')]
+class MaintenanceController extends AbstractController
+{
+    private CarRepository $carRepository;
+    private MaintenanceRepository $maintenanceRepository;
+    private SerializerInterface $serializer;
+    private AutoMapperInterface $autoMapper;
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(CarRepository          $carRepository, MaintenanceRepository $maintenanceRepository,
+                                EntityManagerInterface $entityManager,
+                                SerializerInterface    $serializer, AutoMapperInterface $autoMapper)
+    {
+        $this->carRepository = $carRepository;
+        $this->maintenanceRepository = $maintenanceRepository;
+        $this->serializer = $serializer;
+        $this->autoMapper = $autoMapper;
+        $this->entityManager = $entityManager;
+    }
+
+    #[Route(methods: ['GET'])]
+    public function getAllMaintenances(Uuid $carId): JsonResponse
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $maintenances = $this->maintenanceRepository->findBy(['car' => $car]);
+
+        $getMaintenancesDtos = $this->autoMapper->mapMultiple($maintenances, GetMaintenanceDto::class);
+        $json = $this->serializer->serialize($getMaintenancesDtos, JsonEncoder::FORMAT);
+
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
+    }
+
+    #[Route('/{maintenanceId}', methods: ['GET'])]
+    public function getMaintenance(Uuid $carId, Uuid $maintenanceId): JsonResponse
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $maintenance = $this->maintenanceRepository->findOneBy(['id' => $maintenanceId, 'car' => $car]);
+        if (!$maintenance) {
+            return new JsonResponse('Maintenance not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $getMaintenanceDto = $this->autoMapper->map($maintenance, GetMaintenanceDto::class);
+        $json = $this->serializer->serialize($getMaintenanceDto, JsonEncoder::FORMAT);
+
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
+    }
+
+    #[Route(methods: ['POST'])]
+    public function createMaintenance(Uuid $carId, #[MapRequestPayload]
+    CreateMaintenanceDto                   $createMaintenanceDto):
+    JsonResponse
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $maintenance = $this->autoMapper->map($createMaintenanceDto, Maintenance::class);
+        $maintenance->setCar($car);
+
+        $this->entityManager->persist($maintenance);
+        $this->entityManager->flush();
+
+        $getMaintenanceDto = $this->autoMapper->map($maintenance, GetMaintenanceDto::class);
+        $json = $this->serializer->serialize($getMaintenanceDto, JsonEncoder::FORMAT);
+
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
+    }
+
+    #[Route('/{maintenanceId}', methods: ['PUT'])]
+    public function updateMaintenance(Uuid $carId, Uuid $maintenanceId, Request $request): JsonResponse
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $maintenance = $this->maintenanceRepository->findOneBy(['id' => $maintenanceId, 'car' => $car]);
+        if (!$maintenance) {
+            return new JsonResponse('Maintenance not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $updateMaintenanceDto = $this->serializer->denormalize($data, UpdateMaintenanceDto::class);
+
+        $this->autoMapper->mapToObject($updateMaintenanceDto, $maintenance);
+        $this->entityManager->flush();
+
+        $getMaintenanceDto = $this->autoMapper->map($maintenance, GetMaintenanceDto::class);
+        $json = $this->serializer->serialize($getMaintenanceDto, JsonEncoder::FORMAT);
+
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
+    }
+
+    #[Route('/{maintenanceId}', methods: ['DELETE'])]
+    public function deleteMaintenance(Uuid $carId, Uuid $maintenanceId): Response
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $maintenance = $this->maintenanceRepository->findOneBy(['id' => $maintenanceId, 'car' => $car]);
+        if (!$maintenance) {
+            return new JsonResponse('Maintenance not found', Response::HTTP_NOT_FOUND);
+        }
+
+        $this->entityManager->remove($maintenance);
+        $this->entityManager->flush();
+
+        return new Response(status: Response::HTTP_NO_CONTENT);
+    }
+}
+

@@ -91,6 +91,4 @@ RUN set -eux; \
 	composer dump-autoload --classmap-authoritative --no-dev; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
-	chmod +x bin/console; sync;
-
-RUN php bin/console doctrine:migrations:migrate
+	chmod +x bin/console; sync; 

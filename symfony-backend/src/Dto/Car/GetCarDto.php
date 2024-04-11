@@ -25,7 +25,7 @@ class GetCarDto
     private ?string $plate;
 
     private ?string $VIN;
-
+    
     public function getId(): ?Uuid
     {
         return $this->id;
