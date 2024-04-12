@@ -18,23 +18,12 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(path: '/api', name: 'api_')]
 class SecurityController extends AbstractController
 {
-    private UserPasswordHasherInterface $userPasswordHasher;
-    private EntityManagerInterface $entityManager;
-    private JWTTokenManagerInterface $JWTManager;
-    private AutoMapperInterface $autoMapper;
-
     public function __construct(
-        UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface      $entityManager,
-        JWTTokenManagerInterface    $JWTManager,
-        AutoMapperInterface         $autoMapper,
-    )
-    {
-        $this->userPasswordHasher = $userPasswordHasher;
-        $this->entityManager = $entityManager;
-        $this->JWTManager = $JWTManager;
-        $this->autoMapper = $autoMapper;
-    }
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly JWTTokenManagerInterface $JWTManager,
+        private readonly AutoMapperInterface $autoMapper,
+    ){}
 
     #[Route('/register', name: 'app_register')]
     public function register(#[MapRequestPayload]

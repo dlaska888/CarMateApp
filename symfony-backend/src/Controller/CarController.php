@@ -24,25 +24,13 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/api/cars')]
 class CarController extends AbstractController
 {
-    private CarRepository $carRepository;
-    private EntityManagerInterface $entityManager;
-    private AutoMapperInterface $autoMapper;
-    private SerializerInterface $serializer;
-    private PaginatorInterface $paginator;
-
     public function __construct(
-        CarRepository $carRepository,
-        EntityManagerInterface $entityManager,
-        AutoMapperInterface $autoMapper,
-        SerializerInterface $serializer,
-        PaginatorInterface $paginator
-    ) {
-        $this->carRepository = $carRepository;
-        $this->entityManager = $entityManager;
-        $this->autoMapper = $autoMapper;
-        $this->serializer = $serializer;
-        $this->paginator = $paginator;
-    }
+        private readonly CarRepository $carRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AutoMapperInterface $autoMapper,
+        private readonly SerializerInterface $serializer,
+        private readonly PaginatorInterface $paginator
+    ) {}
 
     #[Route(methods: ['GET'])]
     public function getAll(#[MapQueryParameter] int $page = 1, #[MapQueryParameter] int $limit = 10): JsonResponse
@@ -133,6 +121,6 @@ class CarController extends AbstractController
         $this->entityManager->remove($car);
         $this->entityManager->flush();
 
-        return new Response(status: Response::HTTP_OK);
+        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 }

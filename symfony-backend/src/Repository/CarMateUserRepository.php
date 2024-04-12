@@ -39,7 +39,7 @@ class CarMateUserRepository extends ServiceEntityRepository implements PasswordU
     }
 
     //    /**
-    //     * @return CarMateUser[] Returns an array of CarMateUser objects
+    //     * @return User[] Returns an array of User objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -53,7 +53,7 @@ class CarMateUserRepository extends ServiceEntityRepository implements PasswordU
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?CarMateUser
+    //    public function findOneBySomeField($value): ?User
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')

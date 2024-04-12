@@ -23,25 +23,16 @@ use Symfony\Component\Uid\Uuid;
 #[Route('/api/cars/{carId}/maintenances')]
 class MaintenanceController extends AbstractController
 {
-    private CarRepository $carRepository;
-    private MaintenanceRepository $maintenanceRepository;
-    private SerializerInterface $serializer;
-    private AutoMapperInterface $autoMapper;
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(CarRepository          $carRepository, MaintenanceRepository $maintenanceRepository,
-                                EntityManagerInterface $entityManager,
-                                SerializerInterface    $serializer, AutoMapperInterface $autoMapper)
-    {
-        $this->carRepository = $carRepository;
-        $this->maintenanceRepository = $maintenanceRepository;
-        $this->serializer = $serializer;
-        $this->autoMapper = $autoMapper;
-        $this->entityManager = $entityManager;
-    }
+    public function __construct(
+        private readonly CarRepository $carRepository,
+        private readonly MaintenanceRepository $maintenanceRepository,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SerializerInterface $serializer,
+        private readonly AutoMapperInterface $autoMapper)
+    {}
 
     #[Route(methods: ['GET'])]
-    public function getAllMaintenances(Uuid $carId): JsonResponse
+    public function getAll(Uuid $carId): JsonResponse
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {
@@ -57,7 +48,7 @@ class MaintenanceController extends AbstractController
     }
 
     #[Route('/{maintenanceId}', methods: ['GET'])]
-    public function getMaintenance(Uuid $carId, Uuid $maintenanceId): JsonResponse
+    public function get(Uuid $carId, Uuid $maintenanceId): JsonResponse
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {
@@ -76,7 +67,7 @@ class MaintenanceController extends AbstractController
     }
 
     #[Route(methods: ['POST'])]
-    public function createMaintenance(Uuid $carId, #[MapRequestPayload]
+    public function create(Uuid $carId, #[MapRequestPayload]
     CreateMaintenanceDto                   $createMaintenanceDto):
     JsonResponse
     {
@@ -98,7 +89,7 @@ class MaintenanceController extends AbstractController
     }
 
     #[Route('/{maintenanceId}', methods: ['PUT'])]
-    public function updateMaintenance(Uuid $carId, Uuid $maintenanceId, Request $request): JsonResponse
+    public function update(Uuid $carId, Uuid $maintenanceId, Request $request): JsonResponse
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {
@@ -123,7 +114,7 @@ class MaintenanceController extends AbstractController
     }
 
     #[Route('/{maintenanceId}', methods: ['DELETE'])]
-    public function deleteMaintenance(Uuid $carId, Uuid $maintenanceId): Response
+    public function delete(Uuid $carId, Uuid $maintenanceId): Response
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {

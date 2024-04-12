@@ -207,7 +207,6 @@ class Car
     public function removeMaintenance(Maintenance $maintenance): self
     {
         if ($this->maintenances->removeElement($maintenance)) {
-            // set the owning side to null (unless already changed)
             if ($maintenance->getCar() === $this) {
                 $maintenance->setCar(null);
             }
