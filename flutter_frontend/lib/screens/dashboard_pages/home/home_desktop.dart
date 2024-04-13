@@ -1,7 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_frontend/catemateapp_theme.dart';
 import 'package:intl/intl.dart';
 
 class HomePageDesktop extends StatelessWidget {
@@ -9,6 +6,7 @@ class HomePageDesktop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color primary = Theme.of(context).primaryColor;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -47,11 +45,11 @@ class HomePageDesktop extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Column(
+                                  Column(
                                     children: [
                                       Icon(
                                         Icons.directions_car,
-                                        color: CarMateAppTheme.primary,
+                                        color: primary,
                                         size: 40.0,
                                       )
                                     ],
@@ -117,11 +115,11 @@ class HomePageDesktop extends StatelessWidget {
                                         DateFormat.yMMMd().format(DateTime.now()))
                                   ],
                                 ),
-                                const Column(
+                                Column(
                                   children: [
                                     Icon(
                                       Icons.tire_repair,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],
@@ -150,12 +148,12 @@ class HomePageDesktop extends StatelessWidget {
                             ],
                           ),
                           margin: const EdgeInsets.all(8.0),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
+                                const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -171,7 +169,7 @@ class HomePageDesktop extends StatelessWidget {
                                   children: [
                                     Icon(
                                       Icons.engineering,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],
@@ -218,11 +216,11 @@ class HomePageDesktop extends StatelessWidget {
                                         DateFormat.yMMMd().format(DateTime.now()))
                                   ],
                                 ),
-                                const Column(
+                                Column(
                                   children: [
                                     Icon(
                                       Icons.disc_full,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],
@@ -266,11 +264,11 @@ class HomePageDesktop extends StatelessWidget {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Column(
+                                  Column(
                                     children: [
                                       Icon(
                                         Icons.directions_car,
-                                        color: CarMateAppTheme.primary,
+                                        color: primary,
                                         size: 40.0,
                                       )
                                     ],
@@ -347,12 +345,12 @@ class HomePageDesktop extends StatelessWidget {
                             ],
                           ),
                           margin: const EdgeInsets.all(8.0),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Column(
+                                const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -364,12 +362,12 @@ class HomePageDesktop extends StatelessWidget {
                                     Text("56 000km")
                                   ],
                                 ),
-                                SizedBox(width: 48,),
+                                const SizedBox(width: 48,),
                                 Column(
                                   children: [
                                     Icon(
                                       Icons.add_road,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],
@@ -398,12 +396,12 @@ class HomePageDesktop extends StatelessWidget {
                             ],
                           ),
                           margin: const EdgeInsets.all(8.0),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Column(
+                                const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -415,12 +413,12 @@ class HomePageDesktop extends StatelessWidget {
                                     Text("1.6 90hp")
                                   ],
                                 ),
-                                SizedBox(width: 48,),
+                                const SizedBox(width: 48,),
                                 Column(
                                   children: [
                                     Icon(
                                       Icons.directions_car,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],
@@ -449,12 +447,12 @@ class HomePageDesktop extends StatelessWidget {
                             ],
                           ),
                           margin: const EdgeInsets.all(8.0),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Column(
+                                const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -466,12 +464,12 @@ class HomePageDesktop extends StatelessWidget {
                                     Text("2012")
                                   ],
                                 ),
-                                SizedBox(width: 48,),
+                                const SizedBox(width: 48,),
                                 Column(
                                   children: [
                                     Icon(
                                       Icons.access_time_filled,
-                                      color: CarMateAppTheme.primary,
+                                      color: primary,
                                       size: 40.0,
                                     )
                                   ],

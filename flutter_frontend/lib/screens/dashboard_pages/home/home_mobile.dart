@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/catemateapp_theme.dart';
 import 'package:intl/intl.dart';
 
 class HomePageMobile extends StatelessWidget {
@@ -7,6 +6,7 @@ class HomePageMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color primary = Theme.of(context).primaryColor;
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -42,11 +42,11 @@ class HomePageMobile extends StatelessWidget {
                       Text(DateFormat.yMMMd().format(DateTime.now()))
                     ],
                   ),
-                  const Column(
+                  Column(
                     children: [
                       Icon(
                         Icons.tire_repair,
-                        color: CarMateAppTheme.primary,
+                        color: primary,
                         size: 40.0,
                       )
                     ],
@@ -72,12 +72,12 @@ class HomePageMobile extends StatelessWidget {
               ],
             ),
             margin: const EdgeInsets.all(8.0),
-            child: const Padding(
-              padding: EdgeInsets.all(16.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -92,7 +92,7 @@ class HomePageMobile extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.engineering,
-                        color: CarMateAppTheme.primary,
+                        color: primary,
                         size: 40.0,
                       )
                     ],
@@ -134,11 +134,11 @@ class HomePageMobile extends StatelessWidget {
                       Text(DateFormat.yMMMd().format(DateTime.now()))
                     ],
                   ),
-                  const Column(
+                  Column(
                     children: [
                       Icon(
                         Icons.disc_full,
-                        color: CarMateAppTheme.primary,
+                        color: primary,
                         size: 40.0,
                       )
                     ],

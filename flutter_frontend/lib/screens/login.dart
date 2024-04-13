@@ -1,111 +1,125 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_frontend/catemateapp_theme.dart';
+import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:form_validator/form_validator.dart';
+import 'package:http/http.dart' as http;
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  void _toastMessage(context, String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Theme.of(context).primaryColorLight,
+        textColor: Colors.white,
+        fontSize: 16.0);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
-            backgroundColor: Colors.white,
-            foregroundColor: CarMateAppTheme.primary,
-            textStyle:
-                const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: CarMateAppTheme.primary,
-        body: Expanded(
-            child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              Container(
-                height: MediaQuery.of(context).size.height / 2,
-                padding: EdgeInsets.all(48.0),
-                decoration: const BoxDecoration(
-                    color: CarMateAppTheme.primaryLight,
-                    borderRadius: BorderRadius.all(Radius.circular(16.0))),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Login",
-                        style: TextStyle(color: Colors.white, fontSize: 48.0)),
-                    const TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0))),
-                        hintText: 'Email or Username',
-                        fillColor:
-                            Colors.white, // Set background color to white
-                        filled: true, // Apply the filled background
-                        contentPadding:
-                            EdgeInsets.all(8.0), // Adjust padding if needed
-                        constraints:
-                            BoxConstraints(maxWidth: 500), // Set max width
-                      ),
-                    ),
-                    const TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0))),
-                        hintText: 'Password',
-                        fillColor:
-                            Colors.white, // Set background color to white
-                        filled: true, // Apply the filled background
-                        contentPadding:
-                            EdgeInsets.all(8.0), // Adjust padding if needed
-                        constraints:
-                            BoxConstraints(maxWidth: 500), // Set max width
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, "/dashboard");
-                      },
-                      child: const Text("Login"),
-                    ),
-                    RichText(
-                      text: TextSpan(
-                          text: "Dont have an account? Sign up",
-                          style: TextStyle(color: Colors.white, fontSize: 16.0),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => Navigator.pushNamed(context, "/register")),
-                    )
-                  ],
-                ),
+    Color primary = Theme.of(context).primaryColor;
+    Color primaryLight = Theme.of(context).primaryColorLight;
+
+    return Scaffold(
+      backgroundColor: primary,
+      body: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            Container(
+              height: MediaQuery.of(context).size.height / 2.25,
+              padding: const EdgeInsets.all(48.0),
+              decoration: BoxDecoration(
+                color: primaryLight,
+                borderRadius: const BorderRadius.all(Radius.circular(16.0)),
               ),
-              const Spacer(),
-              const Padding(
-                padding: EdgeInsets.all(32.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.directions_car,
-                      color: Colors.white,
-                      size: 48.0,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Login",
+                      style: Theme.of(context).textTheme.displayLarge),
+                  TextFormField(
+                    controller: _email,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(
+                      hintText: 'Email',
                     ),
-                    Text("CarMate",
-                        style: TextStyle(color: Colors.white, fontSize: 24.0))
-                  ],
-                ),
-              )
-            ],
-          ),
-        )),
+                    validator: ValidationBuilder().email().build(),
+                  ),
+                  TextFormField(
+                    obscureText: true,
+                    controller: _password,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: const InputDecoration(
+                      hintText: 'Password',
+                    ),
+                    validator: ValidationBuilder().required().build(),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        ApiClient().sendRequest(ApiEndpoints.loginEndpoint, {
+                          'username': _email.text,
+                          'password': _password.text,
+                        }).then((value) {
+                          Navigator.pushNamed(context, '/dashboard');
+                        }).catchError((error) {
+                          _toastMessage(context, "Error: $error");
+                        });
+                      }
+                    },
+                    child: const Text("Login"),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      text: "Don't have an account? Sign up",
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 16.0),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap =
+                            () => Navigator.pushNamed(context, "/register"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            const Padding(
+              padding: EdgeInsets.all(32.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.directions_car,
+                    color: Colors.white,
+                    size: 48.0,
+                  ),
+                  Text("CarMate",
+                      style: TextStyle(color: Colors.white, fontSize: 24.0)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

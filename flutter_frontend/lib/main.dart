@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/catemateapp_theme.dart';
 import 'package:flutter_frontend/screens/dashboard.dart';
 import 'package:flutter_frontend/screens/index.dart';
 import 'package:flutter_frontend/screens/login.dart';
@@ -14,9 +15,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
+      theme: lightTheme,
+      home: const Index(),
       routes: {
-        '/': (context) => const Index(),
         '/login': (context) => const Login(),
         '/register': (context) => const Register(),
         '/dashboard': (context) => const Dashboard(),

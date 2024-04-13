@@ -1,9 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_frontend/catemateapp_theme.dart';
-import 'package:intl/intl.dart';
 
 class MyCarsPage extends StatelessWidget {
   const MyCarsPage({super.key});
@@ -16,7 +11,7 @@ class MyCarsPage extends StatelessWidget {
           : MainAxisAlignment.center,
       children: [
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 800),
           child: Container(
               decoration: BoxDecoration(
                 color: Colors.white, // Set background color (optional)
@@ -32,7 +27,7 @@ class MyCarsPage extends StatelessWidget {
                   ),
                 ],
               ),
-              margin: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(16.0),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -53,7 +48,7 @@ class MyCarsPage extends StatelessWidget {
                       ],
                     ),
                     Column(
-                      children: [Image.asset("images/car1.jpg", height: 100)],
+                      children: [Image.asset("images/car1.jpg", height: 200)],
                     )
                   ],
                 ),
