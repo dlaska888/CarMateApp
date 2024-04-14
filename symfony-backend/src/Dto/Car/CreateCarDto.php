@@ -21,13 +21,13 @@ class CreateCarDto
     #[Assert\PositiveOrZero]
     public ?float $displacement;
 
-    #[Assert\DateTime]
+    #[Assert\Type(type: 'DateTimeInterface')]
     public ?DateTimeInterface $productionDate;
 
     #[Assert\PositiveOrZero]
     public ?int $mileage;
 
-    #[Assert\DateTime]
+    #[Assert\Type(type: 'DateTimeInterface')]
     public ?DateTimeInterface $purchaseDate;
 
     #[Assert\Length(min: 6, max: 8)]
@@ -37,3 +37,5 @@ class CreateCarDto
     public ?string $VIN;
 
 }
+
+// generate json body for request based on this dto

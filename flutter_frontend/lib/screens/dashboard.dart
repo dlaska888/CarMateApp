@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/screens/dashboard_pages/home/home_responsive.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
 
@@ -12,7 +12,7 @@ class Dashboard extends StatefulWidget {
 
 class _Dashboard extends State<Dashboard> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-  final _pages = const [HomeResponsivePage(), MyCarsPage(), ExpensesPage()];
+  final _pages = const [HomePage(), MyCarsPage(), ExpensesPage()];
   var _selectedPage = 0;
 
   @override

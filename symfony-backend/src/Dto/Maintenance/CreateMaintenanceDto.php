@@ -17,7 +17,7 @@ class CreateMaintenanceDto
     #[Assert\PositiveOrZero]
     public ?int $dueMileage;
 
-    #[Assert\DateTime]
+    #[Assert\Type(type: 'DateTimeInterface')]
     public ?DateTimeInterface $dueDate;
 
     #[Assert\PositiveOrZero]

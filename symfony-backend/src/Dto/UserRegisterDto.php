@@ -9,6 +9,7 @@ class UserRegisterDto
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Length(min: 3, max: 30)]
+        #[Assert\Regex(pattern: '/^[a-zA-Z0-9_]+$/', message: 'Only letters, numbers and underscores are allowed')]
         private ?string $username = null,
         
         #[Assert\NotBlank]
@@ -18,8 +19,22 @@ class UserRegisterDto
 
         #[Assert\NotBlank]
         #[Assert\Length(min: 6, max: 128)]
-        private ?string $password = null
+        private ?string $password = null,
+        
+        #[Assert\NotBlank]
+        #[Assert\EqualTo(propertyPath: 'password')]
+        private ?string $passwordConfirm = null
     ) {
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
     }
 
     public function getEmail(): ?string
@@ -42,13 +57,13 @@ class UserRegisterDto
         $this->password = $password;
     }
 
-    public function getUsername(): ?string
+    public function getPasswordConfirm(): ?string
     {
-        return $this->username;
+        return $this->passwordConfirm;
     }
 
-    public function setUsername(?string $username): void
+    public function setPasswordConfirm(?string $passwordConfirm): void
     {
-        $this->username = $username;
+        $this->passwordConfirm = $passwordConfirm;
     }
 }

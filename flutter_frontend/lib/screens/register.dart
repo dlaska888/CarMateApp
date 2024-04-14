@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_frontend/notification_service.dart';
 import 'package:form_validator/form_validator.dart';
 
 class Register extends StatefulWidget {
@@ -18,16 +18,29 @@ class _RegisterState extends State<Register> {
   final TextEditingController _password = TextEditingController();
   final TextEditingController _cpassword = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  var _isLoading = false;
 
-  void _toastMessage(context, String message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Theme.of(context).primaryColorLight,
-        textColor: Colors.white,
-        fontSize: 16.0);
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      ApiClient.sendRequest(ApiEndpoints.registerEndpoint, {
+        'username': _username.text,
+        'email': _email.text,
+        'password': _password.text,
+        'passwordConfirm': _cpassword.text,
+      }).then((value) {
+        Navigator.pushNamed(context, '/dashboard');
+      }).catchError((error) {
+        NotificationService.showNotification("Error: $error",
+            type: MessageType.error);
+      }).whenComplete(() {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
   }
 
   @override
@@ -44,12 +57,13 @@ class _RegisterState extends State<Register> {
           children: [
             const Spacer(),
             Container(
-              height: MediaQuery.of(context).size.height / 1.75,
               padding: const EdgeInsets.all(48.0),
               decoration: BoxDecoration(
                 color: primaryLight,
                 borderRadius: const BorderRadius.all(Radius.circular(16.0)),
               ),
+              constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height / 1.5),
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -62,9 +76,14 @@ class _RegisterState extends State<Register> {
                     decoration: const InputDecoration(
                       hintText: 'Username',
                     ),
-                    validator: ValidationBuilder().minLength(3).build(),
+                    validator: ValidationBuilder()
+                        .minLength(3)
+                        .regExp(RegExp('^[a-zA-Z0-9_]+\$'),
+                            'Only letters, numbers and underscores are allowed')
+                        .build(),
                   ),
                   TextFormField(
+                    autofillHints: const [AutofillHints.email],
                     controller: _email,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(
@@ -73,7 +92,9 @@ class _RegisterState extends State<Register> {
                     validator: ValidationBuilder().email().build(),
                   ),
                   TextFormField(
+                    autofillHints: const [AutofillHints.password],
                     controller: _password,
+                    obscureText: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(
                       hintText: 'Password',
@@ -92,7 +113,9 @@ class _RegisterState extends State<Register> {
                         .build(),
                   ),
                   TextFormField(
+                    autofillHints: const [AutofillHints.password],
                     controller: _cpassword,
+                    obscureText: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(
                       hintText: 'Password confirm',
@@ -104,21 +127,10 @@ class _RegisterState extends State<Register> {
                     },
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ApiClient().sendRequest(ApiEndpoints.registerEndpoint, {
-                          'username': _username.text,
-                          'email': _email.text,
-                          'password': _password.text,
-                          'passwordConfirm': _cpassword.text,
-                        }).then((value) {
-                          Navigator.pushNamed(context, '/dashboard');
-                        }).catchError((error) {
-                          _toastMessage(context, "Error: $error");
-                        });
-                      }
-                    },
-                    child: const Text("Register"),
+                    onPressed: _submit,
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text("Register"),
                   ),
                   RichText(
                     text: TextSpan(
