@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
+import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,10 +15,11 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  final TextEditingController _username = TextEditingController();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final TextEditingController _cpassword = TextEditingController();
+  final _secureStorage = const FlutterSecureStorage();
+  final _username = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _cpassword = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
 
@@ -25,12 +28,15 @@ class _RegisterState extends State<Register> {
       setState(() {
         _isLoading = true;
       });
-      ApiClient.sendRequest(ApiEndpoints.registerEndpoint, {
-        'username': _username.text,
-        'email': _email.text,
-        'password': _password.text,
-        'passwordConfirm': _cpassword.text,
-      }).then((value) {
+      ApiClient.sendRequest(ApiEndpoints.registerEndpoint,
+          methodFun: http.post,
+          body: {
+            'username': _username.text,
+            'email': _email.text,
+            'password': _password.text,
+            'passwordConfirm': _cpassword.text,
+          }).then((data) {
+        _secureStorage.write(key: 'jwt', value: data['token']);
         Navigator.pushNamed(context, '/dashboard');
       }).catchError((error) {
         NotificationService.showNotification("Error: $error",
@@ -83,7 +89,7 @@ class _RegisterState extends State<Register> {
                         .build(),
                   ),
                   TextFormField(
-                    autofillHints: const [AutofillHints.email],
+                    autofillHints: const [AutofillHints.newUsername],
                     controller: _email,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(
@@ -92,7 +98,7 @@ class _RegisterState extends State<Register> {
                     validator: ValidationBuilder().email().build(),
                   ),
                   TextFormField(
-                    autofillHints: const [AutofillHints.password],
+                    autofillHints: const [AutofillHints.newPassword],
                     controller: _password,
                     obscureText: true,
                     autovalidateMode: AutovalidateMode.onUserInteraction,

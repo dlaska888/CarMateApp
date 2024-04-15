@@ -4,9 +4,6 @@ import 'package:flutter_frontend/screens/dashboard.dart';
 import 'package:flutter_frontend/screens/index.dart';
 import 'package:flutter_frontend/screens/login.dart';
 import 'package:flutter_frontend/screens/register.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-const storage = FlutterSecureStorage();
 
 void main() {
   runApp(const MyApp());

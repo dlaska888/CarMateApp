@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
+import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -13,8 +15,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final _secureStorage = const FlutterSecureStorage();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
 
@@ -23,10 +26,14 @@ class _LoginState extends State<Login> {
       setState(() {
         _isLoading = true;
       });
-      ApiClient.sendRequest(ApiEndpoints.loginEndpoint, {
-        'username': _email.text,
-        'password': _password.text,
-      }).then((value) {
+      ApiClient.sendRequest(ApiEndpoints.loginEndpoint,
+          methodFun: http.post,
+          body: {
+            'username': _email.text,
+            'password': _password.text,
+          }).then((data) {
+        _secureStorage.write(key: 'jwt', value: data['token']);
+        _secureStorage.write(key: 'jwtRefresh', value: data['refreshToken']);
         Navigator.pushNamed(context, '/dashboard');
       }).catchError((error) {
         NotificationService.showNotification("Error: $error",
@@ -67,7 +74,7 @@ class _LoginState extends State<Login> {
                   Text("Login",
                       style: Theme.of(context).textTheme.displayLarge),
                   TextFormField(
-                    autofillHints: const [AutofillHints.email],
+                    autofillHints: const [AutofillHints.username],
                     controller: _email,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: const InputDecoration(

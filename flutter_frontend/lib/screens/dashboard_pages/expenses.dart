@@ -6,8 +6,8 @@ class ExpensesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
+    return Expanded(
+        child: Center(
             child: SfCartesianChart(
                 primaryXAxis: const CategoryAxis(),
                 // Chart title
