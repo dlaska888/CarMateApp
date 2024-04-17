@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Index extends StatelessWidget {
   const Index({super.key});
@@ -64,7 +65,7 @@ class Index extends StatelessWidget {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, "/login");
+                            context.go('/login');
                           },
                           child: const Text("Sign In"),
                         ),
@@ -73,7 +74,7 @@ class Index extends StatelessWidget {
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, "/register");
+                            context.go('/register');
                           },
                           child: const Text("Sign Up"),
                         )

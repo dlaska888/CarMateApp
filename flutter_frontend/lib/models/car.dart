@@ -12,8 +12,8 @@ class Car {
   final List<dynamic> maintenances;
 
   Car({
-    this.id,
-    this.name,
+    required this.id,
+    required this.name,
     this.model,
     this.brand,
     this.displacement,

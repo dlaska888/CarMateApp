@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 Color primary = const Color(0xFF0090BE);
+Color primaryLight = const Color.fromARGB(255, 114, 189, 214);
 ThemeData lightTheme = ThemeData(
     colorScheme: ThemeData().colorScheme.copyWith(primary: primary),
     primaryColor: primary,
     primaryColorDark: const Color(0xFF002278),
-    primaryColorLight: const Color.fromARGB(255, 114, 189, 214),
+    primaryColorLight: primaryLight,
     disabledColor: const Color.fromRGBO(169, 169, 169, 0.36),
     scaffoldBackgroundColor: Colors.white,
     cardColor: Colors.white,
@@ -38,4 +39,9 @@ ThemeData lightTheme = ThemeData(
       filled: true, // Apply the filled background
       contentPadding: EdgeInsets.all(8.0), // Adjust padding if needed
       constraints: BoxConstraints(maxWidth: 500),
-    ));
+    ),
+    datePickerTheme: DatePickerThemeData(
+      surfaceTintColor: primaryLight,
+    ),
+    dialogTheme: DialogTheme(surfaceTintColor: primaryLight),
+    bottomSheetTheme: BottomSheetThemeData(surfaceTintColor: primary));

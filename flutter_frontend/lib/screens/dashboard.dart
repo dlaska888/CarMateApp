@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/screens/dashboard_button.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/settings.dart';
+import 'package:go_router/go_router.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -91,8 +94,7 @@ class _Dashboard extends State<Dashboard> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
-                          onPressed: () =>
-                              Navigator.pushNamed(context, "/login"),
+                          onPressed: () => context.go('/login'),
                           label: const Text("Log out"),
                           icon: const Icon(Icons.logout),
                         )
@@ -149,7 +151,8 @@ class _Dashboard extends State<Dashboard> {
             selectedIndex: _selectedPage,
             onDestinationSelected: (int index) {
               if (index == _pages.length) {
-                Navigator.pushNamed(context, '/login');
+                ApiClient.logout();
+                context.go('/login');
                 return;
               }
               setState(() {
@@ -180,28 +183,23 @@ class _Dashboard extends State<Dashboard> {
             backgroundColor: primary,
             indicatorColor: primaryLight,
           ),
-        _pages[_selectedPage]
+        Expanded(child: _pages[_selectedPage])
       ]),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: primary,
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: DashBoardButton(_selectedPage),
       bottomNavigationBar: screenWidth <= 900
           ? BottomNavigationBar(
               showSelectedLabels: false,
               showUnselectedLabels: false,
+              currentIndex: _selectedPage > 2 ? 0 : _selectedPage,
               onTap: (index) => setState(() {
                 _selectedPage = index;
               }),
-              items: [
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.home, color: primary), label: ""),
+                    icon: Icon(Icons.directions_car), label: ""),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.directions_car, color: primary),
-                    label: ""),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.attach_money, color: primary), label: "")
+                    icon: Icon(Icons.attach_money), label: "")
               ],
             )
           : null,

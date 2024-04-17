@@ -5,6 +5,7 @@ import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
@@ -27,22 +28,26 @@ class _LoginState extends State<Login> {
         _isLoading = true;
       });
       ApiClient.sendRequest(ApiEndpoints.loginEndpoint,
-          methodFun: http.post,
-          body: {
+              methodFun: http.post,
+              body: {
             'username': _email.text,
             'password': _password.text,
-          }).then((data) {
-        _secureStorage.write(key: 'jwt', value: data['token']);
-        _secureStorage.write(key: 'jwtRefresh', value: data['refreshToken']);
-        Navigator.pushNamed(context, '/dashboard');
-      }).catchError((error) {
-        NotificationService.showNotification("Error: $error",
-            type: MessageType.error);
-      }).whenComplete(() {
-        setState(() {
-          _isLoading = false;
-        });
-      });
+          })
+          .then((data) async {
+            await _secureStorage.write(key: 'jwt', value: data['token']);
+            await _secureStorage.write(
+                key: 'jwtRefresh', value: data['refreshToken']);
+          })
+          .then((value) => context.go('/dashboard'))
+          .catchError((error) {
+            NotificationService.showNotification("Error: $error",
+                type: MessageType.error);
+          })
+          .whenComplete(() {
+            setState(() {
+              _isLoading = false;
+            });
+          });
     }
   }
 
@@ -100,13 +105,11 @@ class _LoginState extends State<Login> {
                   ),
                   RichText(
                     text: TextSpan(
-                      text: "Don't have an account? Sign up",
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 16.0),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap =
-                            () => Navigator.pushNamed(context, "/register"),
-                    ),
+                        text: "Don't have an account? Sign up",
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 16.0),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => context.go('/register')),
                   ),
                 ],
               ),

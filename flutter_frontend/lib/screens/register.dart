@@ -5,6 +5,7 @@ import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
@@ -29,23 +30,26 @@ class _RegisterState extends State<Register> {
         _isLoading = true;
       });
       ApiClient.sendRequest(ApiEndpoints.registerEndpoint,
-          methodFun: http.post,
-          body: {
+              methodFun: http.post,
+              body: {
             'username': _username.text,
             'email': _email.text,
             'password': _password.text,
             'passwordConfirm': _cpassword.text,
-          }).then((data) {
-        _secureStorage.write(key: 'jwt', value: data['token']);
-        Navigator.pushNamed(context, '/dashboard');
-      }).catchError((error) {
-        NotificationService.showNotification("Error: $error",
-            type: MessageType.error);
-      }).whenComplete(() {
-        setState(() {
-          _isLoading = false;
-        });
-      });
+          })
+          .then((data) async {
+            await _secureStorage.write(key: 'jwt', value: data['token']);
+          })
+          .then((value) => context.go('/dashboard'))
+          .catchError((error) {
+            NotificationService.showNotification("Error: $error",
+                type: MessageType.error);
+          })
+          .whenComplete(() {
+            setState(() {
+              _isLoading = false;
+            });
+          });
     }
   }
 
@@ -144,7 +148,7 @@ class _RegisterState extends State<Register> {
                       style:
                           const TextStyle(color: Colors.white, fontSize: 16.0),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () => Navigator.pushNamed(context, "/login"),
+                        ..onTap = () => context.go('/login'),
                     ),
                   ),
                 ],

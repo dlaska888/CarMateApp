@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
     final primary = Theme.of(context).primaryColor;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Expanded(
+    return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: screenWidth > 768
             ? MainAxisAlignment.center
