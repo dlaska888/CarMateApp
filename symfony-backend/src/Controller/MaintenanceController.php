@@ -19,8 +19,10 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Uid\Uuid;
+use OpenApi\Attributes as OA;
 
 #[Route('/api/cars/{carId}/maintenances')]
+#[OA\Tag(name: 'Maintenance')]
 class MaintenanceController extends AbstractController
 {
     public function __construct(

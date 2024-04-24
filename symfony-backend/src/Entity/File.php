@@ -19,9 +19,6 @@ class File
     #[ORM\Column(type: "string", length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(type: "string", length: 255)]
-    private ?string $path = null;
-
     public function getId(): ?Uuid
     {
         return $this->id;
@@ -35,18 +32,6 @@ class File
     public function setName(?string $name): self
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getPath(): ?string
-    {
-        return $this->path;
-    }
-
-    public function setPath(?string $path): self
-    {
-        $this->path = $path;
 
         return $this;
     }

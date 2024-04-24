@@ -52,7 +52,6 @@ nelmio_api_doc:
               description: Unauthorized
       /api/refresh:
         post:
-          summary: Refresh access token
           tags:
             - Security
           requestBody:
