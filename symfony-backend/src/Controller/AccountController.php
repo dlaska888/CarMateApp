@@ -6,6 +6,7 @@ use App\Dto\PhotoUploadDto;
 use App\Dto\User\GetUserDto;
 use App\Dto\User\ChangePasswordDto;
 use App\Dto\User\ChangeUsernameDto;
+use App\Entity\CarMateUser;
 use App\Entity\File;
 use App\Repository\CarMateUserRepository;
 use AutoMapperPlus\AutoMapperInterface;
@@ -68,13 +69,19 @@ class AccountController extends AbstractController
     #[Route('/change-password', methods: ['POST'])]
     public function changePassword(#[MapRequestPayload] ChangePasswordDto $dto): JsonResponse
     {
+        /** @var CarMateUser $user */
         $user = $this->getUser();
 
         if (!$this->passwordHasher->isPasswordValid($user, $dto->password)){
             return new JsonResponse('Password is incorrect', Response::HTTP_BAD_REQUEST);
         }
 
-        $user->setPassword($dto->newPassword);
+        $user->setPassword(
+            $this->passwordHasher->hashPassword(
+                $user,
+                $dto->password
+            )
+        );
         $this->entityManager->flush();
 
         return new JsonResponse('Password updated', Response::HTTP_OK);

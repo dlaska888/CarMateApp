@@ -38,7 +38,7 @@ class SecurityController extends AbstractController
     {
         $find = $this->entityManager
             ->getRepository(CarMateUser::class)
-            ->findBy(["email" => $registerDto->getEmail()]);
+            ->findBy(["email" => $registerDto->email]);
 
         if ($find) {
             throw new BadRequestException("User already exists");
@@ -46,7 +46,7 @@ class SecurityController extends AbstractController
 
         $find = $this->entityManager
             ->getRepository(CarMateUser::class)
-            ->findBy(["username" => $registerDto->getUsername()]);
+            ->findBy(["username" => $registerDto->username]);
 
         if ($find) {
             throw new BadRequestException("User already exists");
@@ -56,7 +56,7 @@ class SecurityController extends AbstractController
         $user->setPassword(
             $this->userPasswordHasher->hashPassword(
                 $user,
-                $registerDto->getPassword()
+                $registerDto->password
             )
         );
 

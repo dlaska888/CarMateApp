@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/screens/forms/form_helper.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
 
 class AddCarForm extends StatefulWidget {
-  const AddCarForm({super.key});
+  final Function onSubmit;
+  const AddCarForm(this.onSubmit, {super.key});
 
   @override
   AddCarFormState createState() => AddCarFormState();
@@ -14,35 +17,25 @@ class AddCarForm extends StatefulWidget {
 
 class AddCarFormState extends State<AddCarForm> {
   final _formKey = GlobalKey<FormState>();
-  final _name = TextEditingController();
-  final _model = TextEditingController();
-  final _brand = TextEditingController();
-  final _displacement = TextEditingController();
-  final _productionDate = TextEditingController();
-  final _mileage = TextEditingController();
-  final _purchaseDate = TextEditingController();
-  final _plate = TextEditingController();
-  final _vin = TextEditingController();
+  final _car = Car();
+  final productionDateController = TextEditingController();
+  final purchaseDateController = TextEditingController();
   var _isLoading = false;
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
       setState(() {
         _isLoading = true;
       });
       ApiClient.sendRequest(ApiEndpoints.carsEndpoint,
-          methodFun: http.post,
-            body: {
-            if (_name.text.isNotEmpty) 'name': _name.text,
-            if (_model.text.isNotEmpty) 'model': _model.text,
-            if (_brand.text.isNotEmpty) 'brand': _brand.text,
-            if (_displacement.text.isNotEmpty) 'displacement': _displacement.text,
-            if (_productionDate.text.isNotEmpty) 'productionDate': _productionDate.text,
-            if (_mileage.text.isNotEmpty) 'mileage': _mileage.text,
-            if (_purchaseDate.text.isNotEmpty) 'purchaseDate': _purchaseDate.text,
-            if (_plate.text.isNotEmpty) 'plate': _plate.text,
-            if (_vin.text.isNotEmpty) 'vin': _vin.text,
-            }).then((value) => Navigator.pop(context)).catchError((error) {
+              methodFun: http.post,
+              body: _car.toJson(),
+              authorizedRequest: true)
+          .then((_) {
+        widget.onSubmit();
+        Navigator.pop(context);
+      }).catchError((error) {
         NotificationService.showNotification("Error: $error",
             type: MessageType.error);
       }).whenComplete(() {
@@ -50,32 +43,6 @@ class AddCarFormState extends State<AddCarForm> {
           _isLoading = false;
         });
       });
-    }
-  }
-
-  Future<void> _selectDate(TextEditingController controller) async {
-    var picked = await showDatePicker(
-        context: context, firstDate: DateTime.now(), lastDate: DateTime(2100));
-
-    if (picked != null) {
-      setState(() {
-        controller.text = picked.toString().split(" ")[0];
-      });
-    }
-  }
-
-  String? _selectFloat(value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    try {
-      double displacement = double.parse(value);
-      if (displacement <= 0) {
-        return 'Displacement must be a positive number';
-      }
-      return null;
-    } catch (e) {
-      return 'Invalid Displacement format';
     }
   }
 
@@ -97,9 +64,8 @@ class AddCarFormState extends State<AddCarForm> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextFormField(
-                    controller: _name,
                     decoration: const InputDecoration(
-                      hintText: 'Name',
+                      labelText: 'Name *',
                     ),
                     validator: ValidationBuilder()
                         .required()
@@ -107,88 +73,151 @@ class AddCarFormState extends State<AddCarForm> {
                         .maxLength(50)
                         .build(),
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        if (value!.isNotEmpty) _car.name = value;
+                      });
+                    },
                   ),
+                  const SizedBox(),
                   TextFormField(
-                    controller: _model,
                     decoration: const InputDecoration(
-                      hintText: 'Model',
+                      labelText: 'Brand',
                     ),
                     validator: ValidationBuilder(optional: true)
                         .maxLength(255)
                         .build(),
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        if (value!.isNotEmpty) _car.brand = value;
+                      });
+                    },
                   ),
                   TextFormField(
-                    controller: _brand,
                     decoration: const InputDecoration(
-                      hintText: 'Brand',
+                      labelText: 'Model',
                     ),
                     validator: ValidationBuilder(optional: true)
                         .maxLength(255)
                         .build(),
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        if (value!.isNotEmpty) _car.model = value;
+                      });
+                    },
                   ),
                   TextFormField(
-                    controller: _displacement,
                     decoration: const InputDecoration(
-                      hintText: 'Displacement',
+                      labelText: 'Engine displacement',
                     ),
-                    validator: _selectFloat,
+                    validator: FormHelper.validateFloatInput,
                     keyboardType: TextInputType.number,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        _car.displacement = double.tryParse(value!);
+                      });
+                    },
                   ),
                   TextFormField(
-                    controller: _productionDate,
                     decoration: const InputDecoration(
                         labelText: 'Production Date',
                         filled: true,
                         prefixIcon: Icon(Icons.calendar_today)),
                     readOnly: true,
-                    onTap: () {
-                      _selectDate(_productionDate);
+                    controller: productionDateController,
+                    onTap: () async {
+                      var picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          initialDatePickerMode: DatePickerMode.year);
+                      if (picked != null) {
+                        setState(() {
+                          productionDateController.text =
+                              picked.toString().split(" ")[0];
+                        });
+                      }
+                    },
+                    onSaved: (value) {
+                      setState(() {
+                        _car.productionDate =
+                            DateTime.tryParse(productionDateController.text);
+                      });
                     },
                   ),
                   TextFormField(
-                    controller: _mileage,
                     decoration: const InputDecoration(
-                      hintText: 'Mileage',
-                    ),
-                    validator: _selectFloat,
-                    keyboardType: TextInputType.number,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                  TextFormField(
-                    controller: _purchaseDate,
-                    decoration: const InputDecoration(
-                        labelText: 'Purchase Date',
-                        filled: true,
-                        prefixIcon: Icon(Icons.calendar_today)),
-                    readOnly: true,
-                    onTap: () {
-                      _selectDate(_purchaseDate);
-                    },
-                  ),
-                  TextFormField(
-                    controller: _plate,
-                    decoration: const InputDecoration(
-                      hintText: 'Plate',
-                    ),
-                    validator: ValidationBuilder(optional: true)
-                        .minLength(6)
-                        .maxLength(8)
-                        .build(),
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
-                  TextFormField(
-                    controller: _vin,
-                    decoration: const InputDecoration(
-                      hintText: 'VIN',
+                      labelText: 'VIN',
                     ),
                     validator: ValidationBuilder(optional: true)
                         .minLength(17)
                         .maxLength(17)
                         .build(),
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        if (value!.isNotEmpty) _car.vin = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: 'Purchase Date',
+                        filled: true,
+                        prefixIcon: Icon(Icons.calendar_today)),
+                    readOnly: true,
+                    controller: purchaseDateController,
+                    onTap: () async {
+                      var picked = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          initialDatePickerMode: DatePickerMode.year);
+                      if (picked != null) {
+                        setState(() {
+                          purchaseDateController.text =
+                              picked.toString().split(" ")[0];
+                        });
+                      }
+                    },
+                    onSaved: (value) {
+                      setState(() {
+                        _car.purchaseDate =
+                            DateTime.tryParse(purchaseDateController.text);
+                      });
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Mileage',
+                    ),
+                    validator: FormHelper.validateIntInput,
+                    keyboardType: TextInputType.number,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        _car.mileage = int.tryParse(value!);
+                      });
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Plate',
+                    ),
+                    validator: ValidationBuilder(optional: true)
+                        .minLength(6)
+                        .maxLength(8)
+                        .build(),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    onSaved: (value) {
+                      setState(() {
+                        if (value!.isNotEmpty) _car.plate = value;
+                      });
+                    },
                   ),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 500),

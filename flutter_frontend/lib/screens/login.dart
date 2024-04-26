@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +15,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  final _secureStorage = const FlutterSecureStorage();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -34,9 +32,7 @@ class _LoginState extends State<Login> {
             'password': _password.text,
           })
           .then((data) async {
-            await _secureStorage.write(key: 'jwt', value: data['token']);
-            await _secureStorage.write(
-                key: 'jwtRefresh', value: data['refreshToken']);
+            await ApiClient.login(data['token'], data['refresh_token']);
           })
           .then((value) => context.go('/dashboard'))
           .catchError((error) {

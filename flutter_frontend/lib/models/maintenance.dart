@@ -1,14 +1,14 @@
 class Maintenance {
-  final String id;
-  final String name;
-  final String? description;
-  final int? dueMileage;
-  final DateTime? dueDate;
-  final double? cost;
+  String? id;
+  String? name;
+  String? description;
+  int? dueMileage;
+  DateTime? dueDate;
+  double? cost;
 
   Maintenance({
-    required this.id,
-    required this.name,
+    this.id,
+    this.name,
     this.description,
     this.dueMileage,
     this.dueDate,

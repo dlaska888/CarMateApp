@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/screens/dashboard_button.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
@@ -185,7 +184,6 @@ class _Dashboard extends State<Dashboard> {
           ),
         Expanded(child: _pages[_selectedPage])
       ]),
-      floatingActionButton: DashBoardButton(_selectedPage),
       bottomNavigationBar: screenWidth <= 900
           ? BottomNavigationBar(
               showSelectedLabels: false,

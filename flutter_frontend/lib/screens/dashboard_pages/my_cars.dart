@@ -1,178 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/models/car.dart';
+import 'package:flutter_frontend/models/paged_results.dart';
+import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/cars_components/car_card.dart';
+import 'package:flutter_frontend/screens/forms/add_car.dart';
+import 'package:flutter_frontend/screens/forms/form_button.dart';
 
-class MyCarsPage extends StatelessWidget {
+class MyCarsPage extends StatefulWidget {
   const MyCarsPage({super.key});
 
   @override
+  State<MyCarsPage> createState() => _MyCarsPageState();
+}
+
+class _MyCarsPageState extends State<MyCarsPage> {
+  late Future<PagedResults<Car>> futureCars;
+
+  @override
+  void initState() {
+    super.initState();
+    futureCars = fetchCars();
+  }
+
+  Future<PagedResults<Car>> fetchCars() async {
+    return ApiClient.sendRequest(ApiEndpoints.carsEndpoint,
+            authorizedRequest: true)
+        .then((data) async {
+      return PagedResults<Car>.fromJson(data);
+    }).catchError((error) {
+      NotificationService.showNotification("$error", type: MessageType.error);
+      throw error;
+    });
+  }
+
+  void refreshCars() {
+    setState(() {
+      futureCars = fetchCars();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Wrap(
-        alignment: MediaQuery.of(context).size.width < 768
-            ? WrapAlignment.start
-            : WrapAlignment.center,
+    return Scaffold(
+      floatingActionButton: FormButton(AddCarForm(refreshCars)),
+      body: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2.0,
-                        blurRadius: 4.0,
-                        offset: const Offset(2.0, 2.0),
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "My car name",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text("Hyundai i30 2012"),
-                            Text("1.6 Gas 90hp"),
-                            Text("56 000km"),
-                            Text("Bought 12.06.2014")
-                          ],
-                        ),
-                        const SizedBox(width: 64.0),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                "images/car1.jpg",
-                                fit: BoxFit.fill,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
+          Expanded(
+            child: SingleChildScrollView(
+              child: FutureBuilder<PagedResults<Car>>(
+                future: futureCars,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Wrap(
+                      alignment: MediaQuery.of(context).size.width < 768
+                          ? WrapAlignment.start
+                          : WrapAlignment.center,
+                      children: snapshot.data!.data.map((car) {
+                        return CarCard(car);
+                      }).toList(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  // By default, show a loading spinner.
+                  return const CircularProgressIndicator();
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2.0,
-                        blurRadius: 4.0,
-                        offset: const Offset(2.0, 2.0),
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "My car name",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text("Hyundai i30 2012"),
-                            Text("1.6 Gas 90hp"),
-                            Text("56 000km"),
-                            Text("Bought 12.06.2014")
-                          ],
-                        ),
-                        const SizedBox(width: 64.0),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                "images/car1.jpg",
-                                fit: BoxFit.fill,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700),
-              child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2.0,
-                        blurRadius: 4.0,
-                        offset: const Offset(2.0, 2.0),
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "My car name",
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text("Hyundai i30 2012"),
-                            Text("1.6 Gas 90hp"),
-                            Text("56 000km"),
-                            Text("Bought 12.06.2014")
-                          ],
-                        ),
-                        const SizedBox(width: 64.0),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                "images/car1.jpg",
-                                fit: BoxFit.fill,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
-            ),
-          ),
+          )
         ],
       ),
     );

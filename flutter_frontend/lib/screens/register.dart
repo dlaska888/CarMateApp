@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +15,6 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  final _secureStorage = const FlutterSecureStorage();
   final _username = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -38,7 +36,15 @@ class _RegisterState extends State<Register> {
             'passwordConfirm': _cpassword.text,
           })
           .then((data) async {
-            await _secureStorage.write(key: 'jwt', value: data['token']);
+            // login to obtain token and refresh token
+            ApiClient.sendRequest(ApiEndpoints.loginEndpoint,
+                methodFun: http.post,
+                body: {
+                  'username': _email.text,
+                  'password': _password.text,
+                }).then((data) async {
+              await ApiClient.login(data['token'], data['refresh_token']);
+            });
           })
           .then((value) => context.go('/dashboard'))
           .catchError((error) {

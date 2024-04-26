@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
 
 class AddMaintenanceForm extends StatefulWidget {
-  const AddMaintenanceForm({Key? key});
+  const AddMaintenanceForm({super.key});
 
   @override
   AddMaintenanceFormState createState() => AddMaintenanceFormState();

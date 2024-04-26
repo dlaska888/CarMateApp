@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/screens/dashboard.dart';
 import 'package:flutter_frontend/screens/index.dart';
@@ -12,8 +10,7 @@ GoRouter getRouter() {
       initialLocation: '/',
       redirect: (context, state) async {
         if (state.matchedLocation == '/dashboard' &&
-            !await ApiClient.checkIfLoggedIn()) {
-              log("bro");
+            await ApiClient.getUserToken() == null) {
           return '/login';
         }
 

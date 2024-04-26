@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/screens/forms/add_car.dart';
-import 'package:flutter_frontend/screens/forms/add_maintenance.dart';
 
-class DashBoardButton extends StatelessWidget {
-  final int _selectedPage;
+class FormButton extends StatelessWidget {
+  final Widget _form;
 
-  const DashBoardButton(int selectedPage, {super.key}) :
-    _selectedPage = selectedPage;
-  
+  const FormButton(Widget form, {super.key}) : _form = form;
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final primary = Theme.of(context).primaryColor;
-    StatefulWidget form;
-
-    if (_selectedPage == 0) {
-      form = const AddMaintenanceForm();
-    } else if (_selectedPage == 1) {
-      form = const AddCarForm();
-    } else {
-      return const SizedBox.shrink();
-    }
 
     return FloatingActionButton(
       backgroundColor: primary,
@@ -31,13 +18,14 @@ class DashBoardButton extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 builder: (context) {
-                  return form;
+                  return _form;
                 })
             : showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (context) {
                   return Dialog(
-                    child: form,
+                    child: _form,
                   );
                 });
       },
