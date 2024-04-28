@@ -4,6 +4,6 @@ namespace App\Dto\Security;
 
 class GetTokenAndRefreshDto
 {
-    public ?string $token;
-    public ?string $refreshToken;
+    public ?string $token = null;
+    public ?string $refreshToken = null;
 }

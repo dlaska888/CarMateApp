@@ -33,7 +33,7 @@ class ApiClient {
         response = await methodFun(url, headers: headers);
       }
 
-      final result = jsonDecode(response.body);
+      final result = jsonDecode(response.body.isNotEmpty ? response.body : '{}');
 
       if (response.statusCode >= 400) {
         return Future.error(result.containsKey('message')

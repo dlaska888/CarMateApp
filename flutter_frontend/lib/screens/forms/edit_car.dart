@@ -7,19 +7,19 @@ import 'package:flutter_frontend/screens/forms/form_helper.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
 
-class AddCarForm extends StatefulWidget {
+class EditCarForm extends StatefulWidget {
   final Function onSubmit;
-  const AddCarForm(this.onSubmit, {super.key});
+  final Car car;
+  const EditCarForm(this.car, this.onSubmit, {super.key});
 
   @override
-  AddCarFormState createState() => AddCarFormState();
+  EditCarFormState createState() => EditCarFormState();
 }
 
-class AddCarFormState extends State<AddCarForm> {
+class EditCarFormState extends State<EditCarForm> {
   final _formKey = GlobalKey<FormState>();
-  final _car = Car(id: "", name: "");
-  final productionDateController = TextEditingController();
-  final purchaseDateController = TextEditingController();
+  late TextEditingController productionDateController;
+  late TextEditingController purchaseDateController;
   var _isLoading = false;
 
   void _submit() {
@@ -28,9 +28,9 @@ class AddCarFormState extends State<AddCarForm> {
       setState(() {
         _isLoading = true;
       });
-      ApiClient.sendRequest(ApiEndpoints.carsEndpoint,
-              methodFun: http.post,
-              body: _car.toJson(),
+      ApiClient.sendRequest('${ApiEndpoints.carsEndpoint}/${widget.car.id}',
+              methodFun: http.put,
+              body: widget.car.toJson(),
               authorizedRequest: true)
           .then((_) {
         widget.onSubmit();
@@ -47,8 +47,17 @@ class AddCarFormState extends State<AddCarForm> {
   }
 
   @override
+  void initState() {
+    productionDateController = TextEditingController(
+        text: widget.car.productionDate?.toString().split(" ")[0]);
+    purchaseDateController = TextEditingController(
+        text: widget.car.purchaseDate?.toString().split(" ")[0]);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+      return ClipRRect(
       borderRadius: BorderRadius.circular(16.0),
       child: Container(
         padding: const EdgeInsets.all(8.0),
@@ -64,6 +73,7 @@ class AddCarFormState extends State<AddCarForm> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextFormField(
+                    initialValue: widget.car.name,
                     decoration: const InputDecoration(
                       labelText: 'Name *',
                     ),
@@ -75,12 +85,13 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        if (value!.isNotEmpty) _car.name = value;
+                        widget.car.name = value!.isNotEmpty ? value : widget.car.name;
                       });
                     },
                   ),
                   const SizedBox(),
                   TextFormField(
+                    initialValue: widget.car.brand,
                     decoration: const InputDecoration(
                       labelText: 'Brand',
                     ),
@@ -90,11 +101,12 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        if (value!.isNotEmpty) _car.brand = value;
+                        widget.car.brand = value!.isNotEmpty ? value : null;
                       });
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.car.model,
                     decoration: const InputDecoration(
                       labelText: 'Model',
                     ),
@@ -104,11 +116,12 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        if (value!.isNotEmpty) _car.model = value;
+                        widget.car.model = value!.isNotEmpty ? value : null;
                       });
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.car.displacement?.toString(),
                     decoration: const InputDecoration(
                       labelText: 'Engine displacement',
                     ),
@@ -117,7 +130,7 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        _car.displacement = double.tryParse(value!);
+                        widget.car.displacement = double.tryParse(value!);
                       });
                     },
                   ),
@@ -143,12 +156,13 @@ class AddCarFormState extends State<AddCarForm> {
                     },
                     onSaved: (value) {
                       setState(() {
-                        _car.productionDate =
+                        widget.car.productionDate =
                             DateTime.tryParse(productionDateController.text);
                       });
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.car.vin,
                     decoration: const InputDecoration(
                       labelText: 'VIN',
                     ),
@@ -159,7 +173,7 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        if (value!.isNotEmpty) _car.vin = value;
+                        widget.car.vin = value!.isNotEmpty ? value : null;
                       });
                     },
                   ),
@@ -186,12 +200,13 @@ class AddCarFormState extends State<AddCarForm> {
                     },
                     onSaved: (value) {
                       setState(() {
-                        _car.purchaseDate =
+                        widget.car.purchaseDate =
                             DateTime.tryParse(purchaseDateController.text);
                       });
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.car.mileage?.toString(),
                     decoration: const InputDecoration(
                       labelText: 'Mileage',
                     ),
@@ -200,11 +215,12 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        _car.mileage = int.tryParse(value!);
+                        widget.car.mileage = int.tryParse(value!);
                       });
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.car.plate,
                     decoration: const InputDecoration(
                       labelText: 'Plate',
                     ),
@@ -215,7 +231,7 @@ class AddCarFormState extends State<AddCarForm> {
                     autovalidateMode: AutovalidateMode.onUserInteraction,
                     onSaved: (value) {
                       setState(() {
-                        if (value!.isNotEmpty) _car.plate = value;
+                        widget.car.plate = value!.isNotEmpty ? value : null;
                       });
                     },
                   ),
@@ -234,7 +250,7 @@ class AddCarFormState extends State<AddCarForm> {
                           onPressed: _submit,
                           child: _isLoading
                               ? const CircularProgressIndicator()
-                              : const Text("Add Car"),
+                              : const Text("Edit Car"),
                         ),
                       ],
                     ),

@@ -37,16 +37,15 @@ class _RegisterState extends State<Register> {
           })
           .then((data) async {
             // login to obtain token and refresh token
-            ApiClient.sendRequest(ApiEndpoints.loginEndpoint,
+            var data = await ApiClient.sendRequest(ApiEndpoints.loginEndpoint,
                 methodFun: http.post,
                 body: {
                   'username': _email.text,
                   'password': _password.text,
-                }).then((data) async {
-              await ApiClient.login(data['token'], data['refresh_token']);
-            });
+                });
+            await ApiClient.login(data['token'], data['refresh_token']);
           })
-          .then((value) => context.go('/dashboard'))
+          .then((_) => context.go('/dashboard'))
           .catchError((error) {
             NotificationService.showNotification("Error: $error",
                 type: MessageType.error);

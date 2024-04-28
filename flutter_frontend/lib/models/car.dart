@@ -1,6 +1,6 @@
 class Car {
-  String? id;
-  String? name;
+  String id;
+  String name;
   String? model;
   String? brand;
   double? displacement;
@@ -12,8 +12,8 @@ class Car {
   List<dynamic>? maintenances;
 
   Car({
-    this.id,
-    this.name,
+    required this.id,
+    required this.name,
     this.model,
     this.brand,
     this.displacement,
@@ -52,7 +52,7 @@ class Car {
       mileage: json['mileage'],
       purchaseDate: DateTime.tryParse(json['purchaseDate'] ?? ''),
       plate: json['plate'],
-      vin: json['VIN'],
+      vin: json['vin'],
       maintenances: json['maintenances'],
     );
   }

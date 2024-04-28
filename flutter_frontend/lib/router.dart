@@ -14,6 +14,11 @@ GoRouter getRouter() {
           return '/login';
         }
 
+        if (state.matchedLocation == '/login' &&
+            await ApiClient.getUserToken() != null) {
+          return '/dashboard';
+        }
+
         return state.matchedLocation;
       },
       routes: [

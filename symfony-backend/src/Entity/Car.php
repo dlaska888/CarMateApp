@@ -44,7 +44,7 @@ class Car
     private ?string $plate = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $VIN = null;
+    private ?string $vin = null;
 
     #[ORM\ManyToOne(targetEntity: CarMateUser::class, inversedBy: "cars")]
     #[ORM\JoinColumn(nullable: false)]
@@ -156,14 +156,14 @@ class Car
         return $this;
     }
 
-    public function getVIN(): ?string
+    public function getVin(): ?string
     {
-        return $this->VIN;
+        return $this->vin;
     }
 
-    public function setVIN(string $VIN): self
+    public function setVin(string $vin): self
     {
-        $this->VIN = $VIN;
+        $this->vin = $vin;
         return $this;
     }
 

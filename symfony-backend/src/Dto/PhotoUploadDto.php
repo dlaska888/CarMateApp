@@ -9,5 +9,5 @@ class PhotoUploadDto
 {
     #[Assert\NotBlank(message: 'No photo uploaded')]
     #[Assert\Image(maxSize: '1m', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])]
-    public ?UploadedFile $photo;
+    public ?UploadedFile $photo = null;
 }
