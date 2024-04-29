@@ -1,3 +1,5 @@
+import 'package:flutter_frontend/models/maintenance.dart';
+
 class Car {
   String id;
   String name;
@@ -9,7 +11,7 @@ class Car {
   DateTime? purchaseDate;
   String? plate;
   String? vin;
-  List<dynamic>? maintenances;
+  List<Maintenance> maintenances = [];
 
   Car({
     required this.id,
@@ -22,7 +24,7 @@ class Car {
     this.purchaseDate,
     this.plate,
     this.vin,
-    this.maintenances,
+    this.maintenances = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -36,12 +38,17 @@ class Car {
       'mileage': mileage,
       'purchaseDate': purchaseDate?.toIso8601String(),
       'plate': plate,
-      'vin': vin,
-      'maintenances': maintenances,
+      'vin': vin
+      // maintenances are not included in the JSON
     };
   }
 
   factory Car.fromJson(Map<String, dynamic> json) {
+    final maintenances =
+        List<Maintenance>.from(json['maintenances'].map((maintenance) {
+      return Maintenance.fromJson(maintenance);
+    }));
+
     return Car(
       id: json['id'],
       name: json['name'],
@@ -53,7 +60,7 @@ class Car {
       purchaseDate: DateTime.tryParse(json['purchaseDate'] ?? ''),
       plate: json['plate'],
       vin: json['vin'],
-      maintenances: json['maintenances'],
+      maintenances: maintenances,
     );
   }
 }

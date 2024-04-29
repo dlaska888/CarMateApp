@@ -4,8 +4,8 @@ import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/cars_components/car_info.dart';
-import 'package:flutter_frontend/screens/forms/delete_car.dart';
-import 'package:flutter_frontend/screens/forms/edit_car.dart';
+import 'package:flutter_frontend/screens/forms/cars/delete_car.dart';
+import 'package:flutter_frontend/screens/forms/cars/edit_car.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 
 class CarCard extends StatefulWidget {
@@ -101,7 +101,7 @@ class _CarCardState extends State<CarCard> {
                               softWrap: false,
                             ),
                             Text(
-                              '${_car.brand} ${_car.model}',
+                              '${_car.brand ?? ''} ${_car.model ?? ''}',
                               overflow: TextOverflow.fade,
                               softWrap: false,
                             ),

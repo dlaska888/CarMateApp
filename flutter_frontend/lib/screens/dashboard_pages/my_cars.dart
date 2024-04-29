@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
@@ -5,23 +7,24 @@ import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/paged_results.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/cars_components/car_card.dart';
-import 'package:flutter_frontend/screens/forms/add_car.dart';
+import 'package:flutter_frontend/screens/forms/cars/add_car.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 
 class MyCarsPage extends StatefulWidget {
-  const MyCarsPage({super.key});
+  final Car selectedCar;
+  const MyCarsPage(this.selectedCar, {super.key});
 
   @override
   State<MyCarsPage> createState() => _MyCarsPageState();
 }
 
 class _MyCarsPageState extends State<MyCarsPage> {
-  late Future<PagedResults<Car>> futureCars;
+  late Future<PagedResults<Car>> _futureCars;
 
   @override
   void initState() {
     super.initState();
-    futureCars = fetchCars();
+    _futureCars = fetchCars();
   }
 
   Future<PagedResults<Car>> fetchCars() async {
@@ -37,45 +40,55 @@ class _MyCarsPageState extends State<MyCarsPage> {
 
   void refreshCars() {
     setState(() {
-      futureCars = fetchCars();
+      _futureCars = fetchCars();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<PagedResults<Car>>(
-      future: futureCars,
+      future: _futureCars,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Scaffold(
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                FormModal(context).showModal(AddCarForm(refreshCars));
-              },
-              child: const Icon(Icons.add),
-            ),
-            body: Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Wrap(
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.hasError) {
+          log("Error loading my_cars: ${snapshot.error}");
+          return const Center(
+            child: Text("Could not load cars"),
+          );
+        }
+
+        final carList = snapshot.data!.data
+          ..sort((a, b) => a.id.compareTo(b.id));
+
+        return Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              FormModal(context).showModal(AddCarForm(refreshCars));
+            },
+            child: const Icon(Icons.add),
+          ),
+          body: Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Wrap(
                       alignment: WrapAlignment.center,
-                      children: snapshot.data!.data.map((car) {
+                      children: carList.map((car) {
                         return CarCard(
                           car,
                           key: Key(car.id),
                         );
-                      }).toList()..sort((a, b) => a.car.id.compareTo(b.car.id)),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return const Text('Could not load cars');
-        }
-        return const Center(child: CircularProgressIndicator());
+                      }).toList()),
+                ),
+              )
+            ],
+          ),
+        );
       },
     );
   }

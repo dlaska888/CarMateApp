@@ -1,5 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/models/car.dart';
+import 'package:flutter_frontend/models/paged_results.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
@@ -15,13 +20,35 @@ class Dashboard extends StatefulWidget {
 
 class _Dashboard extends State<Dashboard> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
-  final _pages = const [
-    HomePage(),
-    MyCarsPage(),
-    ExpensesPage(),
-    SettingsPage()
-  ];
   var _selectedPage = 0;
+
+  late Car _selectedCar;
+  late Future<List<Widget>> _futurePages;
+
+  Future<List<Widget>> getPages() async {
+    return ApiClient.sendRequest(ApiEndpoints.carsEndpoint,
+            authorizedRequest: true)
+        .then((data) => PagedResults<Car>.fromJson(data))
+        .then((data) {
+      if (data.data.isNotEmpty) {
+        setState(() {
+          _selectedCar = data.data[0];
+        });
+      }
+      return [
+        HomePage(_selectedCar),
+        MyCarsPage(_selectedCar),
+        ExpensesPage(_selectedCar),
+        const SettingsPage()
+      ];
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _futurePages = getPages();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +176,7 @@ class _Dashboard extends State<Dashboard> {
           NavigationRail(
             selectedIndex: _selectedPage,
             onDestinationSelected: (int index) {
-              if (index == _pages.length) {
+              if (index == 5) {
                 ApiClient.logout();
                 context.go('/login');
                 return;
@@ -182,7 +209,25 @@ class _Dashboard extends State<Dashboard> {
             backgroundColor: primary,
             indicatorColor: primaryLight,
           ),
-        Expanded(child: _pages[_selectedPage])
+        Expanded(
+            child: FutureBuilder<List<Widget>>(
+                future: _futurePages,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    log("Error loading dashboard: ${snapshot.error}");
+                    return const Center(
+                      child: Text("Could not load data"),
+                    );
+                  }
+
+                  return snapshot.data![_selectedPage];
+                }))
       ]),
       bottomNavigationBar: screenWidth <= 900
           ? BottomNavigationBar(

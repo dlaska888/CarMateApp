@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
@@ -52,81 +53,90 @@ class _LoginState extends State<Login> {
     Color primary = Theme.of(context).primaryColor;
     Color primaryLight = Theme.of(context).primaryColorLight;
 
-    return Scaffold(
-      backgroundColor: primary,
-      body: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(48.0),
-              decoration: BoxDecoration(
-                color: primaryLight,
-                borderRadius: const BorderRadius.all(Radius.circular(16.0)),
-              ),
-              constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height / 2),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Login",
-                      style: Theme.of(context).textTheme.displayLarge),
-                  TextFormField(
-                    autofillHints: const [AutofillHints.username],
-                    controller: _email,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: const InputDecoration(
-                      hintText: 'Email',
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event.logicalKey == LogicalKeyboardKey.enter) {
+          _submit();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: primary,
+        body: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(48.0),
+                decoration: BoxDecoration(
+                  color: primaryLight,
+                  borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+                ),
+                constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height / 2),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Login",
+                        style: Theme.of(context).textTheme.displayLarge),
+                    TextFormField(
+                      autofillHints: const [AutofillHints.username],
+                      controller: _email,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration: const InputDecoration(
+                        hintText: 'Email',
+                      ),
+                      validator: ValidationBuilder().email().build(),
                     ),
-                    validator: ValidationBuilder().email().build(),
-                  ),
-                  TextFormField(
-                    autofillHints: const [AutofillHints.password],
-                    controller: _password,
-                    obscureText: true,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: const InputDecoration(
-                      hintText: 'Password',
+                    TextFormField(
+                      autofillHints: const [AutofillHints.password],
+                      controller: _password,
+                      obscureText: true,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                      ),
+                      validator: ValidationBuilder().required().build(),
                     ),
-                    validator: ValidationBuilder().required().build(),
-                  ),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text("Login"),
-                  ),
-                  RichText(
-                    text: TextSpan(
-                        text: "Don't have an account? Sign up",
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 16.0),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => context.go('/register')),
-                  ),
-                ],
+                    ElevatedButton(
+                      onPressed: _submit,
+                      child: _isLoading
+                          ? const CircularProgressIndicator()
+                          : const Text("Login"),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                          text: "Don't have an account? Sign up",
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16.0),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.go('/register')),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Spacer(),
-            const Padding(
-              padding: EdgeInsets.all(32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.directions_car,
-                    color: Colors.white,
-                    size: 48.0,
-                  ),
-                  Text("CarMate",
-                      style: TextStyle(color: Colors.white, fontSize: 24.0)),
-                ],
+              const Spacer(),
+              const Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.directions_car,
+                      color: Colors.white,
+                      size: 48.0,
+                    ),
+                    Text("CarMate",
+                        style: TextStyle(color: Colors.white, fontSize: 24.0)),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
