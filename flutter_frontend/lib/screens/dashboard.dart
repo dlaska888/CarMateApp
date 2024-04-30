@@ -1,11 +1,10 @@
-import 'dart:developer';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
-import 'package:flutter_frontend/models/car.dart';
-import 'package:flutter_frontend/models/paged_results.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_frontend/local_preferences_manager.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/add_first_car.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/logout.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/settings.dart';
@@ -22,32 +21,34 @@ class _Dashboard extends State<Dashboard> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
   var _selectedPage = 0;
 
-  late Car _selectedCar;
-  late Future<List<Widget>> _futurePages;
+  late Future<String?> _futureSelectedCarId;
 
-  Future<List<Widget>> getPages() async {
-    return ApiClient.sendRequest(ApiEndpoints.carsEndpoint,
-            authorizedRequest: true)
-        .then((data) => PagedResults<Car>.fromJson(data))
-        .then((data) {
-      if (data.data.isNotEmpty) {
-        setState(() {
-          _selectedCar = data.data[0];
-        });
-      }
-      return [
-        HomePage(_selectedCar),
-        MyCarsPage(_selectedCar),
-        ExpensesPage(_selectedCar),
-        const SettingsPage()
-      ];
+  List<Widget> getPages(String? selectedCarId) {
+    return [
+      selectedCarId != null
+          ? HomePage(selectedCarId)
+          : AddFirstCarPage(refreshSelectedCarId),
+      selectedCarId != null
+          ? MyCarsPage(selectedCarId)
+          : AddFirstCarPage(refreshSelectedCarId),
+      selectedCarId != null
+          ? ExpensesPage(selectedCarId)
+          : AddFirstCarPage(refreshSelectedCarId),
+      const SettingsPage(),
+      const LogoutPage()
+    ];
+  }
+
+  void refreshSelectedCarId() {
+    setState(() {
+      _futureSelectedCarId = LocalPreferencesManager.getSelectedCarId();
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _futurePages = getPages();
+    _futureSelectedCarId = LocalPreferencesManager.getSelectedCarId();
   }
 
   @override
@@ -176,11 +177,7 @@ class _Dashboard extends State<Dashboard> {
           NavigationRail(
             selectedIndex: _selectedPage,
             onDestinationSelected: (int index) {
-              if (index == 5) {
-                ApiClient.logout();
-                context.go('/login');
-                return;
-              }
+              refreshSelectedCarId();
               setState(() {
                 _selectedPage = index;
               });
@@ -210,24 +207,24 @@ class _Dashboard extends State<Dashboard> {
             indicatorColor: primaryLight,
           ),
         Expanded(
-            child: FutureBuilder<List<Widget>>(
-                future: _futurePages,
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    log("Error loading dashboard: ${snapshot.error}");
-                    return const Center(
-                      child: Text("Could not load data"),
-                    );
-                  }
-
-                  return snapshot.data![_selectedPage];
-                }))
+          child: FutureBuilder(
+              future: _futureSelectedCarId,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Error loading data"),
+                  );
+                }
+          
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+          
+                return getPages(snapshot.data)[_selectedPage];
+              }),
+        ),
       ]),
       bottomNavigationBar: screenWidth <= 900
           ? BottomNavigationBar(

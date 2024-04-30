@@ -132,7 +132,7 @@ class EditCarFormState extends State<EditCarForm> {
                       },
                     ),
                     TextFormField(
-                      initialValue: _car.displacement?.toString(),
+                      initialValue: _car.displacement?.toStringAsFixed(1),
                       decoration: const InputDecoration(
                         labelText: 'Engine displacement',
                       ),

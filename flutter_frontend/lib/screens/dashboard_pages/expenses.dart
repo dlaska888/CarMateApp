@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/models/car.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ExpensesPage extends StatelessWidget {
-  final Car selectedCar;
-  const ExpensesPage(this.selectedCar, {super.key});
+  final String selectedCarId;
+  const ExpensesPage(this.selectedCarId, {super.key});
 
   @override
   Widget build(BuildContext context) {

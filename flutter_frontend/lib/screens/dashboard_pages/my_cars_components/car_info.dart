@@ -69,7 +69,7 @@ class CarInfo extends StatelessWidget {
                           readOnly: true,
                         ),
                         TextFormField(
-                          initialValue: _car.displacement?.toString() ?? 'Not provided',
+                          initialValue: _car.displacement?.toStringAsFixed(1) ?? 'Not provided',
                           decoration: const InputDecoration(
                             labelText: 'Engine displacement',
                           ),

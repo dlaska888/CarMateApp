@@ -4,7 +4,7 @@ import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
 import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_frontend/screens/dashboard_pages/cars_components/maintenance_info.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/home_components/maintenance_info.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 import 'package:flutter_frontend/screens/forms/maintenances/delete_maintenance.dart';
 import 'package:flutter_frontend/screens/forms/maintenances/edit_maintenance.dart';
@@ -129,11 +129,10 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
                 borderRadius: BorderRadius.circular(10.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.5), // Shadow color
-                    spreadRadius: 2.0, // Adjusts shadow spread (optional)
-                    blurRadius: 4.0, // Adjusts shadow blur (optional)
-                    offset:
-                        const Offset(2.0, 2.0), // Sets shadow offset (optional)
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2.0,
+                    blurRadius: 4.0,
+                    offset: const Offset(2.0, 2.0),
                   ),
                 ],
               ),
@@ -153,7 +152,7 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
                           ),
                           if (_maintenance.dueDate != null)
                             Text(
-                                'Due date: ${DateFormat('yyyy-MM-dd').format(_maintenance.dueDate!)}'),
+                                'Due date: ${DateFormat('d MMMM yyyy').format(_maintenance.dueDate!)}'),
                           if (_maintenance.dueMileage != null)
                             Text('Due mileage: ${_maintenance.dueMileage} km'),
                         ],
@@ -170,9 +169,7 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
                     )
                   ],
                 ),
-              )
-              // ... other Container properties (width, height, child)
-              ),
+              )),
         ),
       ),
     );

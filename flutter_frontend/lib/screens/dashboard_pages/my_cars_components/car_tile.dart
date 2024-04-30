@@ -3,20 +3,21 @@ import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_frontend/screens/dashboard_pages/cars_components/car_info.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/my_cars_components/car_info.dart';
 import 'package:flutter_frontend/screens/forms/cars/delete_car.dart';
 import 'package:flutter_frontend/screens/forms/cars/edit_car.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 
-class CarCard extends StatefulWidget {
+class CarTile extends StatefulWidget {
   final Car car;
-  const CarCard(this.car, {super.key});
+  final bool isCarSelected;
+  const CarTile(this.car, {this.isCarSelected = false, super.key});
 
   @override
-  State<CarCard> createState() => _CarCardState();
+  State<CarTile> createState() => _CarTileState();
 }
 
-class _CarCardState extends State<CarCard> {
+class _CarTileState extends State<CarTile> {
   late Car _car;
   bool isCarDeleted = false;
 
@@ -39,7 +40,7 @@ class _CarCardState extends State<CarCard> {
     });
   }
 
-  void removeCar(){
+  void removeCar() {
     setState(() {
       isCarDeleted = true;
     });
@@ -68,10 +69,14 @@ class _CarCardState extends State<CarCard> {
       padding: const EdgeInsets.all(16.0),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 500),
-        child: Container(
+        child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10.0),
+              border: widget.isCarSelected
+                  ? Border.all(color: Colors.green, width: 3.0)
+                  : null,
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
@@ -135,16 +140,16 @@ class _CarCardState extends State<CarCard> {
                                   onTap: () => FormModal(context).showModal(
                                       EditCarForm(_car, refreshCar))),
                               PopupMenuItem(
-                                value: 'delete',
-                                child: const Row(children: [
-                                  Icon(Icons.delete_outline),
-                                  SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text('Delete')
-                                ]),
-                                onTap: () => FormModal(context).showModal(DeleteCarForm(_car, removeCar))
-                              )
+                                  value: 'delete',
+                                  child: const Row(children: [
+                                    Icon(Icons.delete_outline),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text('Delete')
+                                  ]),
+                                  onTap: () => FormModal(context).showModal(
+                                      DeleteCarForm(_car, removeCar)))
                             ];
                           }),
                         ],

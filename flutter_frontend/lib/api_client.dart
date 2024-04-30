@@ -6,6 +6,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class ApiClient {
+  static const _jwtKey = 'jwt';
+  static const _jwtRefreshKey = 'jwtRefresh';
+  static const _storage = FlutterSecureStorage();
+
   static Future sendRequest(String path,
       {Function methodFun = http.get,
       Map<String, dynamic>? body,
@@ -33,7 +37,8 @@ class ApiClient {
         response = await methodFun(url, headers: headers);
       }
 
-      final result = jsonDecode(response.body.isNotEmpty ? response.body : '{}');
+      final result =
+          jsonDecode(response.body.isNotEmpty ? response.body : '{}');
 
       if (response.statusCode >= 400) {
         return Future.error(result.containsKey('message')
@@ -49,21 +54,17 @@ class ApiClient {
   }
 
   static Future login(String jwt, String refreshToken) async {
-    const storage = FlutterSecureStorage();
-    await storage.write(key: 'jwt', value: jwt);
-    await storage.write(key: 'jwtRefresh', value: refreshToken);
+    await _storage.write(key: _jwtKey, value: jwt);
+    await _storage.write(key: _jwtRefreshKey, value: refreshToken);
   }
 
   static void logout() async {
-    const storage = FlutterSecureStorage();
-    await storage.delete(key: 'jwt');
-    await storage.delete(key: 'jwtRefresh');
+    await _storage.deleteAll();
   }
 
   static Future<String?> getUserToken() async {
-    const storage = FlutterSecureStorage();
-    final jwt = await storage.read(key: 'jwt');
-    final refreshToken = await storage.read(key: 'jwtRefresh');
+    final jwt = await _storage.read(key: _jwtKey);
+    final refreshToken = await _storage.read(key: _jwtRefreshKey);
 
     if (jwt != null && !JwtDecoder.isExpired(jwt)) {
       return jwt;

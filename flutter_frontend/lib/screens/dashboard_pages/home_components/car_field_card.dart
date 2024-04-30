@@ -11,15 +11,15 @@ class CarFieldCard extends StatelessWidget {
     final primary = Theme.of(context).primaryColor;
     return Container(
         decoration: BoxDecoration(
-          color: Colors.white, // Set background color (optional)
+          color: Colors.white, 
           borderRadius:
-              BorderRadius.circular(10.0), // Add rounded corners (optional)
+              BorderRadius.circular(10.0), 
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // Shadow color
-              spreadRadius: 2.0, // Adjusts shadow spread (optional)
-              blurRadius: 4.0, // Adjusts shadow blur (optional)
-              offset: const Offset(2.0, 2.0), // Sets shadow offset (optional)
+              color: Colors.grey.withOpacity(0.5), 
+              spreadRadius: 2.0, 
+              blurRadius: 4.0, 
+              offset: const Offset(2.0, 2.0), 
             ),
           ],
         ),
