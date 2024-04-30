@@ -72,7 +72,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 600),
+                constraints: const BoxConstraints(maxHeight: 500),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -96,6 +96,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                       decoration: const InputDecoration(
                         labelText: 'Description',
                       ),
+                      maxLines: 3,
                       validator: ValidationBuilder(optional: true)
                           .maxLength(255)
                           .build(),
@@ -160,7 +161,6 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                         });
                       },
                     ),
-                    const SizedBox(),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 500),
                       child: Row(
@@ -176,7 +176,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                             onPressed: _submitMaintenance,
                             child: _isLoading
                                 ? const CircularProgressIndicator()
-                                : const Text("Add Maintenance"),
+                                : const Text("Add"),
                           ),
                         ],
                       ),

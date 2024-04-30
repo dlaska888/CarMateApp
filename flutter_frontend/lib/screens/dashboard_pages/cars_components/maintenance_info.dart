@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/models/car.dart';
+import 'package:flutter_frontend/models/maintenance.dart';
 
-class CarInfo extends StatelessWidget {
-  final Car _car;
-  const CarInfo(this._car, {super.key});
+class MaintenanceInfo extends StatelessWidget {
+  final Maintenance _maintenance;
+  const MaintenanceInfo(this._maintenance, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -43,74 +43,45 @@ class CarInfo extends StatelessWidget {
                   ),
                   ConstrainedBox(
                     constraints:
-                        const BoxConstraints(maxHeight: 600, maxWidth: 500),
+                        const BoxConstraints(maxHeight: 400, maxWidth: 500),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         TextFormField(
-                          initialValue: _car.name,
+                          initialValue: _maintenance.name,
                           decoration: const InputDecoration(
                             labelText: 'Name',
                           ),
                           readOnly: true,
                         ),
                         TextFormField(
-                          initialValue: _car.brand ?? 'Not provided',
+                          initialValue: _maintenance.description ?? 'Not provided',
                           decoration: const InputDecoration(
-                            labelText: 'Brand',
+                            labelText: 'Description',
                           ),
                           readOnly: true,
+                          maxLines: 3,
                         ),
                         TextFormField(
-                          initialValue: _car.model ?? 'Not provided',
+                          initialValue: _maintenance.dueMileage?.toString() ?? 'Not provided',
                           decoration: const InputDecoration(
-                            labelText: 'Model',
-                          ),
-                          readOnly: true,
-                        ),
-                        TextFormField(
-                          initialValue: _car.displacement?.toString() ?? 'Not provided',
-                          decoration: const InputDecoration(
-                            labelText: 'Engine displacement',
+                            labelText: 'Due Mileage',
                           ),
                           readOnly: true,
                         ),
                         TextFormField(
                           initialValue:
-                              _car.productionDate != null ? _car.productionDate.toString().split(" ")[0] : 'Not provided',
+                              _maintenance.dueDate != null ? _maintenance.dueDate.toString().split(" ")[0] : 'Not provided',
                           decoration: const InputDecoration(
-                              labelText: 'Production Date',
+                              labelText: 'Due Date',
                               filled: true,
                               prefixIcon: Icon(Icons.calendar_today)),
                           readOnly: true,
                         ),
                         TextFormField(
-                          initialValue: _car.vin ?? 'Not provided',
+                          initialValue: _maintenance.cost ?? 'Not provided',
                           decoration: const InputDecoration(
-                            labelText: 'VIN',
-                          ),
-                          readOnly: true,
-                        ),
-                        TextFormField(
-                          initialValue:
-                              _car.purchaseDate != null ? _car.purchaseDate.toString().split(" ")[0] : 'Not provided',
-                          decoration: const InputDecoration(
-                              labelText: 'Purchase Date',
-                              filled: true,
-                              prefixIcon: Icon(Icons.calendar_today)),
-                          readOnly: true,
-                        ),
-                        TextFormField(
-                          initialValue: _car.mileage?.toString() ?? 'Not provided',
-                          decoration: const InputDecoration(
-                            labelText: 'Mileage',
-                          ),
-                          readOnly: true,
-                        ),
-                        TextFormField(
-                          initialValue: _car.plate ?? 'Not provided',
-                          decoration: const InputDecoration(
-                            labelText: 'Plate',
+                            labelText: 'Cost',
                           ),
                           readOnly: true,
                         ),

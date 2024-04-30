@@ -245,7 +245,7 @@ class AddCarFormState extends State<AddCarForm> {
                             onPressed: _submit,
                             child: _isLoading
                                 ? const CircularProgressIndicator()
-                                : const Text("Add Car"),
+                                : const Text("Add"),
                           ),
                         ],
                       ),

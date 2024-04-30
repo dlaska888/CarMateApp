@@ -5,9 +5,11 @@ import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/cars_components/car_field_card.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/cars_components/maintenance_card.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 import 'package:flutter_frontend/screens/forms/maintenances/add_maintenance.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   final Car selectedCar;
@@ -66,6 +68,7 @@ class _HomePageState extends State<HomePage> {
             );
           }
 
+          _car = snapshot.data!;
           final maintenanceList = snapshot.data!.maintenances
             ..sort((a, b) => a.id.compareTo(b.id));
 
@@ -153,6 +156,7 @@ class _HomePageState extends State<HomePage> {
                                     children: maintenanceList.map((m) {
                                   return MaintenanceCard(
                                     m,
+                                    _car,
                                     key: Key(m.id),
                                   );
                                 }).toList())
@@ -257,174 +261,28 @@ class _HomePageState extends State<HomePage> {
                                   alignment: WrapAlignment.spaceEvenly,
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   children: [
-                                    Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors
-                                              .white, // Set background color (optional)
-                                          borderRadius: BorderRadius.circular(
-                                              10.0), // Add rounded corners (optional)
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(
-                                                  0.5), // Shadow color
-                                              spreadRadius:
-                                                  2.0, // Adjusts shadow spread (optional)
-                                              blurRadius:
-                                                  4.0, // Adjusts shadow blur (optional)
-                                              offset: const Offset(2.0,
-                                                  2.0), // Sets shadow offset (optional)
-                                            ),
-                                          ],
-                                        ),
-                                        margin: const EdgeInsets.all(8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Mileage",
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Text("56 000km")
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                width: 48,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Icon(
-                                                    Icons.add_road,
-                                                    color: primary,
-                                                    size: 40.0,
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                        // ... other Container properties (width, height, child)
-                                        ),
-                                    Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors
-                                              .white, // Set background color (optional)
-                                          borderRadius: BorderRadius.circular(
-                                              10.0), // Add rounded corners (optional)
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(
-                                                  0.5), // Shadow color
-                                              spreadRadius:
-                                                  2.0, // Adjusts shadow spread (optional)
-                                              blurRadius:
-                                                  4.0, // Adjusts shadow blur (optional)
-                                              offset: const Offset(2.0,
-                                                  2.0), // Sets shadow offset (optional)
-                                            ),
-                                          ],
-                                        ),
-                                        margin: const EdgeInsets.all(8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Engine",
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Text("1.6 90hp")
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                width: 48,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Icon(
-                                                    Icons.directions_car,
-                                                    color: primary,
-                                                    size: 40.0,
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                        // ... other Container properties (width, height, child)
-                                        ),
-                                    Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors
-                                              .white, // Set background color (optional)
-                                          borderRadius: BorderRadius.circular(
-                                              10.0), // Add rounded corners (optional)
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(
-                                                  0.5), // Shadow color
-                                              spreadRadius:
-                                                  2.0, // Adjusts shadow spread (optional)
-                                              blurRadius:
-                                                  4.0, // Adjusts shadow blur (optional)
-                                              offset: const Offset(2.0,
-                                                  2.0), // Sets shadow offset (optional)
-                                            ),
-                                          ],
-                                        ),
-                                        margin: const EdgeInsets.all(8.0),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Production Date",
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Text("2012")
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                width: 48,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Icon(
-                                                    Icons.access_time_filled,
-                                                    color: primary,
-                                                    size: 40.0,
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        )
-                                        // ... other Container properties (width, height, child)
-                                        ),
+                                    if (_car.displacement != null)
+                                      CarFieldCard(
+                                          "Engine displacement",
+                                          _car.displacement.toString(),
+                                          Icons.agriculture_outlined),
+                                    if (_car.mileage != null)
+                                      CarFieldCard(
+                                          "Milage",
+                                          _car.mileage.toString(),
+                                          Icons.directions_car),
+                                    if (_car.productionDate != null)
+                                      CarFieldCard(
+                                          "Production date",
+                                          DateFormat('yyyy-MM-dd')
+                                              .format(_car.productionDate!),
+                                          Icons.access_time_filled),
+                                    if (_car.purchaseDate != null)
+                                      CarFieldCard(
+                                          "Purchase date",
+                                          DateFormat('yyyy-MM-dd')
+                                              .format(_car.purchaseDate!),
+                                          Icons.shopping_cart),
                                   ],
                                 )
                               ],

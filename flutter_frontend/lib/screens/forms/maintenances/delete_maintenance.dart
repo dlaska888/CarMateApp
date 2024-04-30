@@ -11,7 +11,8 @@ class DeleteMaintenanceForm extends StatefulWidget {
   final Maintenance maintenance;
   final Car car;
   final Function onSubmit;
-  const DeleteMaintenanceForm(this.maintenance, this.car, this.onSubmit, {super.key});
+  const DeleteMaintenanceForm(this.maintenance, this.car, this.onSubmit,
+      {super.key});
 
   @override
   DeleteMaintenanceFormState createState() => DeleteMaintenanceFormState();
@@ -28,7 +29,7 @@ class DeleteMaintenanceFormState extends State<DeleteMaintenanceForm> {
         _isLoading = true;
       });
       ApiClient.sendRequest(
-              '${ApiEndpoints.carsEndpoint}/maintenances/${widget.maintenance.id}',
+              '${ApiEndpoints.carsEndpoint}/${widget.car.id}/maintenances/${widget.maintenance.id}',
               methodFun: http.delete,
               authorizedRequest: true)
           .then((_) {

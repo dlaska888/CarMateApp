@@ -23,6 +23,7 @@ class EditMaintenanceForm extends StatefulWidget {
 class EditMaintenanceFormState extends State<EditMaintenanceForm> {
   final _formKey = GlobalKey<FormState>();
   late Maintenance _maintenance;
+  late Car _car;
   late TextEditingController dueDateController;
   var _isLoading = false;
 
@@ -33,7 +34,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
         _isLoading = true;
       });
       ApiClient.sendRequest(
-              '${ApiEndpoints.carsEndpoint}/maintenances/${_maintenance.id}',
+              '${ApiEndpoints.carsEndpoint}/${_car.id}/maintenances/${_maintenance.id}',
               methodFun: http.put,
               body: _maintenance.toJson(),
               authorizedRequest: true)
@@ -55,6 +56,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
   void initState() {
     super.initState();
     _maintenance = widget.maintenance;
+    _car = widget.car;
     dueDateController = TextEditingController(
         text: _maintenance.dueDate?.toString().split(" ")[0]);
   }
@@ -82,7 +84,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 800),
+                constraints: const BoxConstraints(maxHeight: 500),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -99,18 +101,17 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
                         setState(() {
-                          _maintenance.name = value!.isNotEmpty
-                              ? value
-                              : _maintenance.name;
+                          _maintenance.name =
+                              value!.isNotEmpty ? value : _maintenance.name;
                         });
                       },
                     ),
-                    const SizedBox(),
                     TextFormField(
                       initialValue: _maintenance.description,
                       decoration: const InputDecoration(
                         labelText: 'Description',
                       ),
+                      maxLines: 3,
                       validator: ValidationBuilder(optional: true)
                           .maxLength(255)
                           .build(),
@@ -146,9 +147,8 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       onTap: () async {
                         var picked = await showDatePicker(
                             context: context,
-                            firstDate: DateTime(1900),
-                            lastDate: DateTime.now(),
-                            initialDatePickerMode: DatePickerMode.year);
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2101));
                         if (picked != null) {
                           setState(() {
                             dueDateController.text =
@@ -173,9 +173,8 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
                         setState(() {
-                          _maintenance.cost = value!.isNotEmpty
-                              ? value
-                              : _maintenance.cost;
+                          _maintenance.cost =
+                              value!.isNotEmpty ? value : _maintenance.cost;
                         });
                       },
                     ),
@@ -194,7 +193,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                             onPressed: _submit,
                             child: _isLoading
                                 ? const CircularProgressIndicator()
-                                : const Text("Edit Maintenance"),
+                                : const Text("Edit"),
                           ),
                         ],
                       ),
