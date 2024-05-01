@@ -8,7 +8,10 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: FileRepository::class)]
-class File
+#[ORM\InheritanceType("JOINED")]
+#[ORM\DiscriminatorColumn(name: "discr", type: "string")]
+#[ORM\DiscriminatorMap(["user_photo" => "UserPhoto", "car_photo" => "CarPhoto"])]
+abstract class File
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -32,7 +35,6 @@ class File
     public function setName(?string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 

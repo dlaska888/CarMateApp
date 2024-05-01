@@ -49,24 +49,28 @@ class Car
     #[ORM\ManyToOne(targetEntity: CarMateUser::class, inversedBy: "cars")]
     #[ORM\JoinColumn(nullable: false)]
     private ?CarMateUser $user;
-
-    #[ORM\OneToOne(targetEntity: File::class)]
+    
+    #[ORM\OneToOne(targetEntity: CarPhoto::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private ?File $photo = null;
+    private ?CarPhoto $currentPhoto = null;
 
     #[ORM\OneToMany(targetEntity: Maintenance::class, mappedBy: "car")]
     private Collection $maintenances;
 
+    #[ORM\OneToMany(targetEntity: CarPhoto::class, mappedBy: "car")]
+    private Collection $photos;
+
     public function __construct()
     {
         $this->maintenances = new ArrayCollection();
+        $this->photos = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
     {
         return $this->id;
     }
-    
+
     public function getName(): ?string
     {
         return $this->name;
@@ -178,14 +182,14 @@ class Car
         return $this;
     }
     
-    public function getPhoto(): ?File
+    public function getCurrentPhoto(): ?CarPhoto
     {
-        return $this->photo;
+        return $this->currentPhoto;
     }
-
-    public function setPhoto(?File $photoId): self
+    
+    public function setCurrentPhoto(?CarPhoto $currentPhoto): self
     {
-        $this->photo = $photoId;
+        $this->currentPhoto = $currentPhoto;
         return $this;
     }
 
@@ -212,6 +216,26 @@ class Car
             }
         }
 
+        return $this;
+    }
+
+    public function getPhotos(): Collection
+    {
+        return $this->photos;
+    }
+
+    public function addPhoto(CarPhoto $photo): self
+    {
+        if (!$this->photos->contains($photo)) {
+            $this->photos[] = $photo;
+        }
+        
+        return $this;
+    }
+
+    public function removePhoto(CarPhoto $photo): self
+    {
+        $this->photos->removeElement($photo);
         return $this;
     }
 

@@ -26,6 +26,10 @@ class GetCarDto
     public ?string $plate = null;
 
     public ?string $vin = null;
+    
+    public ?Uuid $currentPhotoId = null;
 
     public array $maintenances;
+    
+    public array $photosIds;
 }

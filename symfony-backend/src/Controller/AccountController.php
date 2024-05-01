@@ -8,6 +8,7 @@ use App\Dto\User\ChangePasswordDto;
 use App\Dto\User\ChangeUsernameDto;
 use App\Entity\CarMateUser;
 use App\Entity\File;
+use App\Entity\UserPhoto;
 use App\Repository\CarMateUserRepository;
 use AutoMapperPlus\AutoMapperInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,12 +32,12 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class AccountController extends AbstractController
 {
     public function __construct(
-        private readonly CarMateUserRepository  $userRepository,
-        private readonly AutoMapperInterface    $autoMapper,
-        private readonly SerializerInterface    $serializer,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly SluggerInterface       $slugger,
-        private readonly ValidatorInterface     $validator,
+        private readonly CarMateUserRepository       $userRepository,
+        private readonly AutoMapperInterface         $autoMapper,
+        private readonly SerializerInterface         $serializer,
+        private readonly EntityManagerInterface      $entityManager,
+        private readonly SluggerInterface            $slugger,
+        private readonly ValidatorInterface          $validator,
         private readonly UserPasswordHasherInterface $passwordHasher
     )
     {
@@ -53,9 +54,10 @@ class AccountController extends AbstractController
     }
 
     #[Route('/change-username', methods: ['POST'])]
-    public function changeUsername(#[MapRequestPayload] ChangeUsernameDto $dto): JsonResponse
+    public function changeUsername(#[MapRequestPayload]
+                                   ChangeUsernameDto $dto): JsonResponse
     {
-        if($this->userRepository->findBy(['username' => $dto->username])){
+        if ($this->userRepository->findBy(['username' => $dto->username])) {
             return new JsonResponse('Username already taken', Response::HTTP_CONFLICT);
         }
 
@@ -67,12 +69,13 @@ class AccountController extends AbstractController
     }
 
     #[Route('/change-password', methods: ['POST'])]
-    public function changePassword(#[MapRequestPayload] ChangePasswordDto $dto): JsonResponse
+    public function changePassword(#[MapRequestPayload]
+                                   ChangePasswordDto $dto): JsonResponse
     {
         /** @var CarMateUser $user */
         $user = $this->getUser();
 
-        if (!$this->passwordHasher->isPasswordValid($user, $dto->password)){
+        if (!$this->passwordHasher->isPasswordValid($user, $dto->password)) {
             return new JsonResponse('Password is incorrect', Response::HTTP_BAD_REQUEST);
         }
 
@@ -90,6 +93,7 @@ class AccountController extends AbstractController
     #[Route('/profile-photo', methods: ['GET'])]
     public function getPhoto(): Response
     {
+        /* @var CarMateUser $user */
         $user = $this->getUser();
         $photo = $user->getPhoto();
         if (!$photo) {
@@ -112,6 +116,12 @@ class AccountController extends AbstractController
             return new JsonResponse($this->serializer->serialize($errors, JsonEncoder::FORMAT), Response::HTTP_BAD_REQUEST, json: true);
         }
 
+        /* @var CarMateUser $user */
+        $user = $this->getUser();
+        if ($user->getPhoto()) {
+            $this->removePhoto($user);
+        }
+
         $originalFilename = pathinfo($photoUploadDto->photo->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
         $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoUploadDto->photo->guessExtension();
@@ -125,7 +135,7 @@ class AccountController extends AbstractController
             return new JsonResponse('Failed to upload photo', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $file = new File();
+        $file = new UserPhoto();
         $file->setName($newFilename);
         $this->entityManager->persist($file);
 
@@ -139,21 +149,29 @@ class AccountController extends AbstractController
     #[Route('/profile-photo', methods: ['DELETE'])]
     public function deletePhoto(): JsonResponse
     {
+        /* @var CarMateUser $user */
         $user = $this->getUser();
         $photo = $user->getPhoto();
         if (!$photo) {
             return new JsonResponse('No photo uploaded', Response::HTTP_NOT_FOUND);
         }
 
-        $path = $this->getParameter('user_photos_directory') . '/' . $photo->getName();
-        unlink($path);
-
-        $this->entityManager->remove($photo);
-        $user->setPhoto(null);
-        $this->entityManager->flush();
+        $this->removePhoto($user);
 
         return new JsonResponse('Photo deleted', Response::HTTP_OK);
     }
 
+    private function removePhoto(CarMateUser $user): void
+    {
+        $photo = $user->getPhoto();
+        if ($photo) {
+            $path = $this->getParameter('user_photos_directory') . '/' . $photo->getName();
+            unlink($path);
+
+            $this->entityManager->remove($photo);
+            $user->setPhoto(null);
+            $this->entityManager->flush();
+        }
+    }
 
 }
