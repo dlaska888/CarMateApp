@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/local_preferences_manager.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +29,7 @@ class DeleteCarFormState extends State<DeleteCarForm> {
       ApiClient.sendRequest('${ApiEndpoints.carsEndpoint}/${widget.car.id}',
               methodFun: http.delete, authorizedRequest: true)
           .then((_) {
+        LocalPreferencesManager.clearSelectedCarId();
         NotificationService.showNotification("Car deleted successfully",
             type: MessageType.ok);
         widget.onSubmit();

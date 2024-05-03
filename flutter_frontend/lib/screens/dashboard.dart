@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_frontend/local_preferences_manager.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/add_first_car.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';

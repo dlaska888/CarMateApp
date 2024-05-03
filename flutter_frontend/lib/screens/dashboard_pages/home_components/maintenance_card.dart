@@ -81,46 +81,42 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
             }
             return false;
           },
-          background: Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(left: 24.0),
-              decoration: const BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.0),
-                  bottomLeft: Radius.circular(10.0),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                  ),
-                ],
+          background: Container(
+            padding: const EdgeInsets.only(left: 24.0),
+            decoration: const BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10.0),
+                bottomLeft: Radius.circular(10.0),
               ),
             ),
-          ),
-          secondaryBackground: Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(right: 24.0),
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(10.0),
-                  bottomRight: Radius.circular(10.0),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.delete,
+                  color: Colors.white,
                 ),
+              ],
+            ),
+          ),
+          secondaryBackground: Container(
+            padding: const EdgeInsets.only(right: 24.0),
+            decoration: const BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(10.0),
+                bottomRight: Radius.circular(10.0),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                  ),
-                ],
-              ),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ),
+              ],
             ),
           ),
           child: Container(

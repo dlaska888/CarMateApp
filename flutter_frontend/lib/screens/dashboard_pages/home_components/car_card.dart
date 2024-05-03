@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home_components/car_field_card.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
 import 'package:intl/intl.dart';
 
 class CarCard extends StatelessWidget {
+
   final Car car;
   const CarCard(this.car, {super.key});
 
@@ -55,7 +57,8 @@ class CarCard extends StatelessWidget {
                             overflow: TextOverflow.fade,
                             softWrap: false,
                           ),
-                          if (car.brand != null && car.model != null)
+                          if (car.brand != null &&
+                              car.model != null)
                             Text(
                               '${car.brand} ${car.model}',
                               overflow: TextOverflow.fade,
@@ -94,28 +97,25 @@ class CarCard extends StatelessWidget {
                 ],
               ),
               margin: const EdgeInsets.all(8.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Image.asset(
-                  "images/car2.jpg",
-                  fit: BoxFit.fill,
-                ),
-              ),
+              child: PhotoCard(car, car.currentPhotoId ?? '', width: 500, height: 300),
             ),
             Wrap(
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (car.displacement != null)
-                  CarFieldCard("Engine displacement",
-                      car.displacement!.toStringAsFixed(1), Icons.electric_car),
+                  CarFieldCard(
+                      "Engine displacement",
+                      car.displacement!.toStringAsFixed(1),
+                      Icons.electric_car),
                 if (car.mileage != null)
                   CarFieldCard(
                       "Milage", car.mileage.toString(), Icons.add_road),
                 if (car.productionDate != null)
                   CarFieldCard(
                       "Production date",
-                      DateFormat('yyyy-MM-dd').format(car.productionDate!),
+                      DateFormat('yyyy-MM-dd')
+                          .format(car.productionDate!),
                       Icons.access_time_filled),
                 if (car.purchaseDate != null)
                   CarFieldCard(

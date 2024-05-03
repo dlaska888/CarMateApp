@@ -26,12 +26,13 @@ use OpenApi\Attributes as OA;
 class MaintenanceController extends AbstractController
 {
     public function __construct(
-        private readonly CarRepository $carRepository,
-        private readonly MaintenanceRepository $maintenanceRepository,
+        private readonly CarRepository          $carRepository,
+        private readonly MaintenanceRepository  $maintenanceRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly SerializerInterface $serializer,
-        private readonly AutoMapperInterface $autoMapper)
-    {}
+        private readonly SerializerInterface    $serializer,
+        private readonly AutoMapperInterface    $autoMapper)
+    {
+    }
 
     #[Route(methods: ['GET'])]
     public function getAll(Uuid $carId): JsonResponse
@@ -70,7 +71,7 @@ class MaintenanceController extends AbstractController
 
     #[Route(methods: ['POST'])]
     public function create(Uuid $carId, #[MapRequestPayload]
-    CreateMaintenanceDto                   $createMaintenanceDto):
+    CreateMaintenanceDto        $createMaintenanceDto):
     JsonResponse
     {
         $car = $this->carRepository->find($carId);
@@ -91,7 +92,9 @@ class MaintenanceController extends AbstractController
     }
 
     #[Route('/{maintenanceId}', methods: ['PUT'])]
-    public function update(Uuid $carId, Uuid $maintenanceId, Request $request): JsonResponse
+    public function update(Uuid $carId, Uuid $maintenanceId, #[MapRequestPayload]
+    UpdateMaintenanceDto        $updateMaintenanceDto):
+    JsonResponse
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {
@@ -102,9 +105,6 @@ class MaintenanceController extends AbstractController
         if (!$maintenance) {
             return new JsonResponse('Maintenance not found', Response::HTTP_NOT_FOUND);
         }
-
-        $data = json_decode($request->getContent(), true);
-        $updateMaintenanceDto = $this->serializer->denormalize($data, UpdateMaintenanceDto::class);
 
         $this->autoMapper->mapToObject($updateMaintenanceDto, $maintenance);
         $this->entityManager->flush();

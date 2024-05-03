@@ -47,7 +47,7 @@ class Car
     private ?string $vin = null;
 
     #[ORM\ManyToOne(targetEntity: CarMateUser::class, inversedBy: "cars")]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?CarMateUser $user;
     
     #[ORM\OneToOne(targetEntity: CarPhoto::class)]

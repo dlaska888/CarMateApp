@@ -3,6 +3,7 @@ import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars_components/car_info.dart';
 import 'package:flutter_frontend/screens/forms/cars/delete_car.dart';
 import 'package:flutter_frontend/screens/forms/cars/edit_car.dart';
@@ -161,20 +162,8 @@ class _CarTileState extends State<CarTile> {
                   ),
                   Column(
                     children: [
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 500),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.asset(
-                                "images/car2.jpg",
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
+                      PhotoCard(_car, _car.currentPhotoId ?? '',
+                          width: 500.0, height: 250.0)
                     ],
                   ),
                 ],

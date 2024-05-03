@@ -7,8 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 class CarPhoto extends File
 {
-    #[ORM\ManyToOne(targetEntity: Car::class, inversedBy: "photos")]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Car::class, inversedBy: 'photos')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Car $car;
     
     public function getCar(): ?Car

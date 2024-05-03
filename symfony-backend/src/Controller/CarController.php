@@ -10,10 +10,12 @@ use App\Dto\PhotoUploadDto;
 use App\Entity\Car;
 use App\Entity\CarPhoto;
 use App\Repository\CarRepository;
+use App\Repository\FileRepository;
 use AutoMapperPlus\AutoMapperInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,7 +41,8 @@ class CarController extends AbstractController
         private readonly SerializerInterface    $serializer,
         private readonly PaginatorInterface     $paginator,
         private readonly ValidatorInterface     $validator,
-        private readonly SluggerInterface       $slugger
+        private readonly SluggerInterface       $slugger,
+        private readonly FileRepository         $fileRepository,
     )
     {
     }
@@ -81,10 +84,7 @@ class CarController extends AbstractController
     #[Route('/{id}', methods: ['GET'])]
     public function get(Uuid $id): JsonResponse
     {
-        $car = $this->carRepository->find($id);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
+        $car = $this->findCar($id);
 
         $getCarDto = $this->autoMapper->map($car, GetCarDto::class);
         $json = $this->serializer->serialize($getCarDto, JsonEncoder::FORMAT);
@@ -112,10 +112,7 @@ class CarController extends AbstractController
     public function update(Uuid $id, #[MapRequestPayload]
     UpdateCarDto                $updateCarDto): JsonResponse
     {
-        $car = $this->carRepository->find($id);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
+        $car = $this->findCar($id);
 
         $this->autoMapper->mapToObject($updateCarDto, $car);
         $this->entityManager->flush();
@@ -129,24 +126,28 @@ class CarController extends AbstractController
     #[Route('/{id}', methods: ['DELETE'])]
     public function delete(Uuid $id): Response
     {
-        $car = $this->carRepository->find($id);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
+        $car = $this->findCar($id);
 
         $this->entityManager->remove($car);
         $this->entityManager->flush();
 
         return new Response(status: Response::HTTP_NO_CONTENT);
     }
-    
+
+    #[Route('/{carId}/photos/{photoId}', methods: ['GET'])]
+    public function getPhoto(Uuid $carId, Uuid $photoId): Response
+    {
+        $car = $this->findCar($carId);
+        $photo = $this->findPhoto($carId, $photoId);
+        $path = $this->getParameter('car_photos_directory') . '/' . $car->getId() . '/' . $photo->getName();
+
+        return new BinaryFileResponse($path, Response::HTTP_OK);
+    }
+
     #[Route('/{id}/photos', methods: ['POST'])]
     public function uploadPhoto(Request $request, Uuid $id): JsonResponse
     {
-        $car = $this->carRepository->find($id);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
+        $car = $this->findCar($id);
 
         $photoUploadDto = new PhotoUploadDto();
         $photoUploadDto->photo = $request->files->get('photo');
@@ -183,22 +184,16 @@ class CarController extends AbstractController
 
         return new JsonResponse($file->getId(), Response::HTTP_OK);
     }
-    
-    #[Route('/{carId}/currentPhoto', methods: ['POST'])]
-    public function setCurrentPhoto(Uuid $carId, #[MapRequestPayload] Uuid $photoId): JsonResponse
-    {
-        $car = $this->carRepository->find($carId);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
-        
-        if($car->getCurrentPhoto()?->getId()->equals($photoId)) {
-            return new JsonResponse('Photo already set as current', Response::HTTP_BAD_REQUEST);
-        }
 
-        $photo = $car->getPhotos()->filter(fn(CarPhoto $photo) => $photo->getId()->equals($photoId))->first();
-        if (!$photo) {
-            return new JsonResponse('Photo not found', Response::HTTP_NOT_FOUND);
+    #[Route('/{carId}/currentPhoto', methods: ['POST'])]
+    public function setCurrentPhoto(Uuid $carId, #[MapRequestPayload]
+    Uuid                                 $photoId): JsonResponse
+    {
+        $car = $this->findCar($carId);
+        $photo = $this->findPhoto($carId, $photoId);
+
+        if ($car->getCurrentPhoto()?->getId()->equals($photoId)) {
+            return new JsonResponse('Photo already set as current', Response::HTTP_BAD_REQUEST);
         }
 
         $car->setCurrentPhoto($photo);
@@ -210,16 +205,8 @@ class CarController extends AbstractController
     #[Route('/{carId}/photos/{photoId}', methods: ['DELETE'])]
     public function deletePhoto(Uuid $carId, Uuid $photoId): Response
     {
-        /* @var Car $car */
-        $car = $this->carRepository->find($carId);
-        if (!$car) {
-            return new JsonResponse('Car not found', Response::HTTP_NOT_FOUND);
-        }
-
-        $photo = $car->getPhotos()->filter(fn(CarPhoto $photo) => $photo->getId()->equals($photoId))->first();
-        if (!$photo) {
-            return new JsonResponse('Photo not found', Response::HTTP_NOT_FOUND);
-        }
+        $car = $this->findCar($carId);
+        $photo = $this->findPhoto($carId, $photoId);
 
         $path = $this->getParameter('car_photos_directory') . '/' . $car->getId() . '/' . $photo->getName();
         unlink($path);
@@ -232,5 +219,30 @@ class CarController extends AbstractController
         $this->entityManager->flush();
 
         return new Response(status: Response::HTTP_NO_CONTENT);
+    }
+
+    private function findCar(Uuid $id): Car
+    {
+        $car = $this->carRepository->find($id);
+        if (!$car) {
+            throw $this->createNotFoundException('Car not found');
+        }
+
+        return $car;
+    }
+
+    private function findPhoto(Uuid $carId, Uuid $photoId): CarPhoto
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            throw $this->createNotFoundException('Car not found');
+        }
+
+        $photo = $this->fileRepository->find($photoId);
+        if (!$photo) {
+            throw $this->createNotFoundException('Photo not found');
+        }
+
+        return $photo;
     }
 }

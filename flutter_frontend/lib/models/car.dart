@@ -11,12 +11,14 @@ class Car {
   DateTime? purchaseDate;
   String? plate;
   String? vin;
+  String? currentPhotoId;
   List<Maintenance> maintenances = [];
+  List<String> photosIds = [];
 
   Car({
     required this.id,
     required this.name,
-    this.model,
+    this.model, 
     this.brand,
     this.displacement,
     this.productionDate,
@@ -24,7 +26,9 @@ class Car {
     this.purchaseDate,
     this.plate,
     this.vin,
+    this.currentPhotoId,
     this.maintenances = const [],
+    this.photosIds = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -38,8 +42,10 @@ class Car {
       'mileage': mileage,
       'purchaseDate': purchaseDate?.toIso8601String(),
       'plate': plate,
-      'vin': vin
+      'vin': vin,
+      'currentPhotoId': currentPhotoId,
       // maintenances are not included in the JSON
+      // photos are not included in the JSON
     };
   }
 
@@ -60,7 +66,9 @@ class Car {
       purchaseDate: DateTime.tryParse(json['purchaseDate'] ?? ''),
       plate: json['plate'],
       vin: json['vin'],
+      currentPhotoId: json['currentPhotoId'],
       maintenances: maintenances,
+      photosIds: List<String>.from(json['photosIds']),
     );
   }
 }
