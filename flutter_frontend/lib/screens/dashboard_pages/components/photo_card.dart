@@ -8,9 +8,9 @@ import 'package:flutter_frontend/models/car.dart';
 class PhotoCard extends StatefulWidget {
   final Car car;
   final String photoId;
-  final double? width;
-  final double? height;
-  const PhotoCard(this.car, this.photoId, {super.key, this.width, this.height});
+  final double width;
+  final double height;
+  const PhotoCard(this.car, this.photoId, {super.key, this.width = 200.0, this.height = 200.0});
 
   @override
   State<PhotoCard> createState() => _PhotoCardState();
@@ -26,8 +26,8 @@ class _PhotoCardState extends State<PhotoCard> {
         if (snapshot.hasError) {
           return ConstrainedBox(
             constraints: BoxConstraints(
-              minWidth: widget.width ?? 200,
-              minHeight: widget.height ?? 200,
+              minWidth: widget.width,
+              minHeight: widget.height,
             ),
             child: Center(
                 child: Icon(

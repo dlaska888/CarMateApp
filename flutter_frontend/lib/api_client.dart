@@ -15,7 +15,6 @@ class ApiClient {
       Map<String, dynamic>? body,
       bool authorizedRequest = false}) async {
     try {
-      http.Response response;
       final url = Uri.parse(path);
       final headers = {
         'Accept': 'application/json',
@@ -30,6 +29,7 @@ class ApiClient {
         headers['Authorization'] = 'Bearer $jwt';
       }
 
+      http.Response response;
       if (body != null) {
         response =
             await methodFun(url, headers: headers, body: jsonEncode(body));
@@ -51,6 +51,23 @@ class ApiClient {
       log('Error: $e');
       return Future.error('Something went wrong');
     }
+  }
+
+  static Future<String> postPhoto(String path, http.MultipartFile file) async {
+    final url = Uri.parse(path);
+    final request = http.MultipartRequest("POST", url);
+    request.headers.addAll({"Authorization": "Bearer ${await getUserToken()}"});
+    request.files.add(file);
+
+    final response = await request.send();
+    final result = jsonDecode(await response.stream.bytesToString());
+
+    if (response.statusCode >= 400) {
+      return Future.error(
+          result.containsKey('message') ? result['message'] : result['detail']);
+    }
+
+    return result;
   }
 
   static Future login(String jwt, String refreshToken) async {

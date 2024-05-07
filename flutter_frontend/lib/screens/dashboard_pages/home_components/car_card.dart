@@ -1,13 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
-import 'package:flutter_frontend/screens/dashboard_pages/home_components/car_field_card.dart';
+import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/components/photo_gallery.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/home_components/car_field_card.dart';
+import 'package:flutter_frontend/screens/forms/cars/photos/add_car_photo.dart';
+import 'package:flutter_frontend/screens/forms/form_modal.dart';
 import 'package:intl/intl.dart';
 
-class CarCard extends StatelessWidget {
-
+class CarCard extends StatefulWidget {
   final Car car;
   const CarCard(this.car, {super.key});
+
+  @override
+  State<CarCard> createState() => _CarCardState();
+}
+
+class _CarCardState extends State<CarCard> {
+  late Car _car;
+
+  Future<Car> fetchCar() async {
+    return ApiClient.sendRequest('${ApiEndpoints.carsEndpoint}/${_car.id}',
+            authorizedRequest: true)
+        .then((data) {
+      return Car.fromJson(data);
+    }).catchError((error) {
+      NotificationService.showNotification("$error", type: MessageType.error);
+      throw error;
+    });
+  }
+
+  void refreshCar() {
+    fetchCar().then((car) {
+      setState(() {
+        _car = car;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _car = widget.car;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,16 +88,15 @@ class CarCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            car.name,
+                            _car.name,
                             style: const TextStyle(
                                 fontSize: 24.0, fontWeight: FontWeight.bold),
                             overflow: TextOverflow.fade,
                             softWrap: false,
                           ),
-                          if (car.brand != null &&
-                              car.model != null)
+                          if (_car.brand != null && _car.model != null)
                             Text(
-                              '${car.brand} ${car.model}',
+                              '${_car.brand} ${_car.model}',
                               overflow: TextOverflow.fade,
                               softWrap: false,
                             ),
@@ -75,7 +111,10 @@ class CarCard extends StatelessWidget {
                           textStyle: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          FormModal(context)
+                              .showModal(AddCarPhotoForm(_car, refreshCar));
+                        },
                         child: const Text("Add Photo"),
                       )
                     ],
@@ -97,30 +136,38 @@ class CarCard extends StatelessWidget {
                 ],
               ),
               margin: const EdgeInsets.all(8.0),
-              child: PhotoCard(car, car.currentPhotoId ?? '', width: 500, height: 300),
+              child: GestureDetector(
+                  onTap: () {
+                    if (_car.currentPhotoId != null) {
+                      showDialog(
+                          context: context,
+                          builder: (context) => PhotoGallery(_car, refreshCar));
+                    }
+                  },
+                  child: PhotoCard(_car, _car.currentPhotoId ?? '',
+                      width: 500, height: 300)),
             ),
             Wrap(
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (car.displacement != null)
+                if (_car.displacement != null)
                   CarFieldCard(
                       "Engine displacement",
-                      car.displacement!.toStringAsFixed(1),
+                      _car.displacement!.toStringAsFixed(1),
                       Icons.electric_car),
-                if (car.mileage != null)
+                if (_car.mileage != null)
                   CarFieldCard(
-                      "Milage", car.mileage.toString(), Icons.add_road),
-                if (car.productionDate != null)
+                      "Milage", _car.mileage.toString(), Icons.add_road),
+                if (_car.productionDate != null)
                   CarFieldCard(
                       "Production date",
-                      DateFormat('yyyy-MM-dd')
-                          .format(car.productionDate!),
+                      DateFormat('yyyy-MM-dd').format(_car.productionDate!),
                       Icons.access_time_filled),
-                if (car.purchaseDate != null)
+                if (_car.purchaseDate != null)
                   CarFieldCard(
                       "Purchase date",
-                      DateFormat('yyyy-MM-dd').format(car.purchaseDate!),
+                      DateFormat('yyyy-MM-dd').format(_car.purchaseDate!),
                       Icons.shopping_cart),
               ],
             )

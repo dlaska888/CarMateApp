@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Dto\Car\CreateCarDto;
 use App\Dto\Car\GetCarDto;
+use App\Dto\Car\SetCurrentPhotoIdDto;
 use App\Dto\Car\UpdateCarDto;
 use App\Dto\PagedResultsDto;
 use App\Dto\PhotoUploadDto;
@@ -187,12 +188,12 @@ class CarController extends AbstractController
 
     #[Route('/{carId}/currentPhoto', methods: ['POST'])]
     public function setCurrentPhoto(Uuid $carId, #[MapRequestPayload]
-    Uuid                                 $photoId): JsonResponse
+    SetCurrentPhotoIdDto                 $dto): JsonResponse
     {
         $car = $this->findCar($carId);
-        $photo = $this->findPhoto($carId, $photoId);
+        $photo = $this->findPhoto($carId, $dto->photoId);
 
-        if ($car->getCurrentPhoto()?->getId()->equals($photoId)) {
+        if ($car->getCurrentPhoto()?->getId()->equals($dto->photoId)) {
             return new JsonResponse('Photo already set as current', Response::HTTP_BAD_REQUEST);
         }
 
@@ -213,9 +214,18 @@ class CarController extends AbstractController
 
         $this->entityManager->remove($photo);
         $car->removePhoto($photo);
-        if ($car->getCurrentPhoto()?->getId()->equals($photoId)) {
-            $car->setCurrentPhoto($car->getPhotos()[0]);
+
+        $currentPhotoId = $car->getCurrentPhoto()?->getId();
+        if ($currentPhotoId?->equals($photoId)) {
+            if ($car->getPhotos()->count() > 1) {
+                $car->setCurrentPhoto($currentPhotoId->equals($car->getPhotos()->first()->getId())
+                    ? $car->getPhotos()[1]
+                    : $car->getPhotos()[0]);
+            } else {
+                $car->setCurrentPhoto(null);
+            }
         }
+        
         $this->entityManager->flush();
 
         return new Response(status: Response::HTTP_NO_CONTENT);

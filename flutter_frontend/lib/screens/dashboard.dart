@@ -213,13 +213,13 @@ class _Dashboard extends State<Dashboard> {
                     child: Text("Error loading data"),
                   );
                 }
-          
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
-          
+
                 return getPages(snapshot.data)[_selectedPage];
               }),
         ),
@@ -229,9 +229,12 @@ class _Dashboard extends State<Dashboard> {
               showSelectedLabels: false,
               showUnselectedLabels: false,
               currentIndex: _selectedPage > 2 ? 0 : _selectedPage,
-              onTap: (index) => setState(() {
-                _selectedPage = index;
-              }),
+              onTap: (index) {
+                refreshSelectedCarId();
+                setState(() {
+                  _selectedPage = index;
+                });
+              },
               items: const [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
                 BottomNavigationBarItem(
