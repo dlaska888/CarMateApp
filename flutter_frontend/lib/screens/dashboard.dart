@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_frontend/local_preferences_manager.dart';
+import 'package:flutter_frontend/screens/dashboard_components/drawer.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/add_first_car.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/logout.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/expenses.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/settings.dart';
-import 'package:go_router/go_router.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -57,93 +57,8 @@ class _Dashboard extends State<Dashboard> {
 
     return Scaffold(
       key: scaffoldKey,
-      drawer: Drawer(
-          backgroundColor: primary,
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                        onPressed: () =>
-                            scaffoldKey.currentState?.closeDrawer(),
-                        icon: const Icon(
-                          Icons.menu_rounded,
-                          color: Colors.white,
-                        )),
-                    IconButton(
-                        onPressed: () =>
-                            scaffoldKey.currentState?.closeDrawer(),
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                        )),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const CircleAvatar(
-                      radius: 150,
-                      backgroundImage: AssetImage("images/car1.jpg"),
-                    ),
-                    const SizedBox(height: 32),
-                    Column(children: [
-                      Text("Your name",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(fontSize: 16.0)),
-                      Text("email@gmail.com",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayLarge!
-                              .copyWith(fontSize: 16 - .0)),
-                    ]),
-                    const SizedBox(height: 32),
-                    Column(
-                      children: [
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => {
-                            setState(() {
-                              _selectedPage = 3;
-                            }),
-                            scaffoldKey.currentState?.closeDrawer()
-                          },
-                          label: const Text("Settings"),
-                          icon: const Icon(Icons.settings),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => context.go('/login'),
-                          label: const Text("Log out"),
-                          icon: const Icon(Icons.logout),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(32.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.directions_car,
-                        color: Colors.white,
-                        size: 48.0,
-                      ),
-                      Text("CarMate",
-                          style: TextStyle(color: Colors.white, fontSize: 24.0))
-                    ],
-                  ),
-                )
-              ],
-            ),
+      drawer: DashboardDrawer((selectedPage) => setState(
+            () => _selectedPage = selectedPage,
           )),
       appBar: screenWidth <= 900
           ? AppBar(

@@ -20,12 +20,13 @@ class AddMaintenanceForm extends StatefulWidget {
 
 class AddMaintenanceFormState extends State<AddMaintenanceForm> {
   final _formKey = GlobalKey<FormState>();
+  final _descriptionFocusNode = FocusNode();
   final _maintenance = Maintenance(id: "", name: "");
   final dueDateController = TextEditingController();
   var _isLoading = false;
 
   void _submitMaintenance() {
-    if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate() && !_descriptionFocusNode.hasFocus) {
       _formKey.currentState!.save();
       setState(() {
         _isLoading = true;
@@ -93,6 +94,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                       },
                     ),
                     TextFormField(
+                      focusNode: _descriptionFocusNode,
                       decoration: const InputDecoration(
                         labelText: 'Description',
                       ),

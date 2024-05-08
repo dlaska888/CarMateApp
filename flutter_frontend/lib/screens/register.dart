@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_frontend/api_client.dart';
 import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/screens/forms/common_validators.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -100,11 +101,7 @@ class _RegisterState extends State<Register> {
                       decoration: const InputDecoration(
                         hintText: 'Username',
                       ),
-                      validator: ValidationBuilder()
-                          .minLength(3)
-                          .regExp(RegExp('^[a-zA-Z0-9_]+\$'),
-                              'Only letters, numbers and underscores are allowed')
-                          .build(),
+                      validator: CommonValidators.getUsernameValidator(),
                     ),
                     TextFormField(
                       autofillHints: const [AutofillHints.newUsername],
@@ -123,19 +120,7 @@ class _RegisterState extends State<Register> {
                       decoration: const InputDecoration(
                         hintText: 'Password',
                       ),
-                      validator: ValidationBuilder()
-                          .minLength(8)
-                          .regExp(RegExp(r'^(?=.*?[A-Z])'),
-                              'Password must contain at least one uppercase letter')
-                          .regExp(RegExp(r'^(?=.*?[a-z])'),
-                              'Password must contain at least one lowercase letter')
-                          .regExp(RegExp(r'^(?=.*?[0-9])'),
-                              'Password must contain at least one number')
-                          .regExp(
-                              RegExp(
-                                  r'^(?=.*?[!@#$%^&*()_\-+={}[\]|;:"<>,./?])'),
-                              'Password must contain at least one special character')
-                          .build(),
+                      validator: CommonValidators.getPasswordValidator(),
                     ),
                     TextFormField(
                       autofillHints: const [AutofillHints.password],

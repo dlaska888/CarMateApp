@@ -6,8 +6,6 @@ import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/photo_gallery.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home_components/car_field_card.dart';
-import 'package:flutter_frontend/screens/forms/cars/photos/add_car_photo.dart';
-import 'package:flutter_frontend/screens/forms/form_modal.dart';
 import 'package:intl/intl.dart';
 
 class CarCard extends StatefulWidget {
@@ -112,8 +110,10 @@ class _CarCardState extends State<CarCard> {
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         onPressed: () {
-                          FormModal(context)
-                              .showModal(AddCarPhotoForm(_car, refreshCar));
+                          showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  PhotoGallery(_car, refreshCar));
                         },
                         child: const Text("Add Photo"),
                       )
@@ -138,11 +138,9 @@ class _CarCardState extends State<CarCard> {
               margin: const EdgeInsets.all(8.0),
               child: GestureDetector(
                   onTap: () {
-                    if (_car.currentPhotoId != null) {
-                      showDialog(
-                          context: context,
-                          builder: (context) => PhotoGallery(_car, refreshCar));
-                    }
+                    showDialog(
+                        context: context,
+                        builder: (context) => PhotoGallery(_car, refreshCar));
                   },
                   child: PhotoCard(_car, _car.currentPhotoId ?? '',
                       width: 500, height: 300)),

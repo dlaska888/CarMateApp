@@ -4,6 +4,7 @@ import 'package:flutter_frontend/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
+import 'package:flutter_frontend/screens/dashboard_pages/components/photo_gallery.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars_components/car_info.dart';
 import 'package:flutter_frontend/screens/forms/cars/delete_car.dart';
 import 'package:flutter_frontend/screens/forms/cars/edit_car.dart';
@@ -162,8 +163,15 @@ class _CarTileState extends State<CarTile> {
                   ),
                   Column(
                     children: [
-                      PhotoCard(_car, _car.currentPhotoId ?? '',
-                          width: 500.0, height: 250.0)
+                      GestureDetector(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    PhotoGallery(_car, refreshCar));
+                          },
+                          child: PhotoCard(_car, _car.currentPhotoId ?? '',
+                              width: 500, height: 300)),
                     ],
                   ),
                 ],

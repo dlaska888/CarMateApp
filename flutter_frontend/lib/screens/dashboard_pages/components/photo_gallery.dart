@@ -6,6 +6,7 @@ import 'package:flutter_frontend/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/photo_card.dart';
 import 'package:flutter_frontend/screens/forms/cars/photos/delete_car_photo.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
+import 'package:flutter_frontend/screens/forms/upload_photo_form.dart';
 import 'package:http/http.dart' as http;
 
 class PhotoGallery extends StatefulWidget {
@@ -32,14 +33,6 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     });
   }
 
-  void refreshCar() {
-    fetchCar().then((car) {
-      setState(() {
-        _car = car;
-      });
-    });
-  }
-
   void setCarCurrentPhoto(String photoId) {
     ApiClient.sendRequest(
             '${ApiEndpoints.carsEndpoint}/${widget.car.id}/currentPhoto',
@@ -56,11 +49,23 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     });
   }
 
-  void deleteCarPhoto(context) {
-    widget.refreshCar();
-    refreshCar();
-    setState(() {
-      _selectedPhotoId = _car.currentPhotoId ?? '';
+  void addPhoto() {
+    fetchCar().then((car) {
+      widget.refreshCar();
+      setState(() {
+        _car = car;
+        _selectedPhotoId = _car.photosIds.last;
+      });
+    });
+  }
+
+  void deletePhoto() {
+    fetchCar().then((car) {
+      widget.refreshCar();
+      setState(() {
+        _car = car;
+        _selectedPhotoId = _car.currentPhotoId ?? '';
+      });
     });
   }
 
@@ -78,11 +83,22 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     final mainPhotoWidth = screenWidth > 1100.0 ? 1000.0 : screenWidth * 0.9;
     final mainPhotoHeight = screenHeight > 800.0 ? 650.0 : screenHeight * 0.7;
 
-    if (_car.photosIds.isEmpty) {
-      Navigator.of(context).pop();
-    }
-
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      SizedBox(
+        width: mainPhotoWidth + 100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const SizedBox(
+              width: 10,
+            ),
+            IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.cancel_outlined,
+                    color: Colors.white, size: 40.0)),
+          ],
+        ),
+      ),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -95,24 +111,25 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                 ),
                 borderRadius: BorderRadius.circular(20.0),
               ),
-           child: Stack(
+              child: Stack(
                 children: [
                   PhotoCard(_car, _selectedPhotoId,
                       width: mainPhotoWidth, height: mainPhotoHeight),
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        FormModal(context).showModal(DeleteCarPhotoForm(_car,
-                            _selectedPhotoId, () => deleteCarPhoto(context)));
-                      },
-                      style: ElevatedButtonTheme.of(context).style!.copyWith(
-                          textStyle: MaterialStateProperty.all(
-                              const TextStyle(fontSize: 16))),
-                      child: const Text('Delete'),
+                  if (_selectedPhotoId.isNotEmpty)
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          FormModal(context).showModal(DeleteCarPhotoForm(
+                              _car, _selectedPhotoId, deletePhoto));
+                        },
+                        style: ElevatedButtonTheme.of(context).style!.copyWith(
+                            textStyle: MaterialStateProperty.all(
+                                const TextStyle(fontSize: 16))),
+                        child: const Text('Delete'),
+                      ),
                     ),
-                  ),
                   if (_car.currentPhotoId == _selectedPhotoId)
                     Positioned(
                         top: 10,
@@ -130,7 +147,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                                       const TextStyle(fontSize: 16))),
                           child: const Text('Current photo'),
                         ))
-                  else
+                  else if (_selectedPhotoId.isNotEmpty)
                     Positioned(
                         top: 10,
                         right: 10,
@@ -160,41 +177,70 @@ class _PhotoGalleryState extends State<PhotoGallery> {
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: screenWidth),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _car.photosIds
-                        .map(
-                          (pId) => GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedPhotoId = pId;
-                              });
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: SizedBox(
+                          width: mainPhotoWidth * 0.2,
+                          height: mainPhotoHeight * 0.2,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.add_rounded,
+                              color: Colors.white,
+                              size: 40.0,
+                            ),
+                            onPressed: () {
+                              FormModal(context).showModal(UploadPhotoForm(
+                                  '${ApiEndpoints.carsEndpoint}/${_car.id}/photos',
+                                  addPhoto));
                             },
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2,
+                          )),
+                    ),
+                  ),
+                  Row(
+                      children: _car.photosIds
+                          .map(
+                            (pId) => GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedPhotoId = pId;
+                                });
+                              },
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                    borderRadius: BorderRadius.circular(20.0),
                                   ),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                ),
-                                child: PhotoCard(
-                                  _car,
-                                  pId,
-                                  width: mainPhotoWidth * 0.2,
-                                  height: mainPhotoHeight * 0.2,
+                                  child: PhotoCard(
+                                    _car,
+                                    pId,
+                                    width: mainPhotoWidth * 0.2,
+                                    height: mainPhotoHeight * 0.2,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        )
-                        .toList()),
+                          )
+                          .toList()),
+                ]),
               ),
             ),
-          ),
+          )
         ],
       ),
     ]);
