@@ -33,7 +33,7 @@ class Maintenance
     private ?string $cost = null;
 
     #[ORM\ManyToOne(targetEntity: Car::class, inversedBy: "maintenances")]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Car $car;
 
     public function getId(): ?Uuid

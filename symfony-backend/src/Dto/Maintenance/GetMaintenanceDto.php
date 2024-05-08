@@ -7,16 +7,16 @@ use Symfony\Component\Uid\Uuid;
 
 class GetMaintenanceDto
 {
-    public ?Uuid $id;
+    public ?Uuid $id = null;
     
-    public ?string $name;
+    public ?string $name = null;
 
-    public ?string $description;
+    public ?string $description = null;
 
-    public ?int $dueMileage;
+    public ?int $dueMileage = null;
 
-    public ?DateTimeInterface $dueDate;
+    public ?DateTimeInterface $dueDate = null;
 
-    public ?string $cost;
+    public ?string $cost = null;
 
 }

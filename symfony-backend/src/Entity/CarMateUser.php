@@ -43,9 +43,9 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Car::class, mappedBy: "user")]
     private Collection $cars;
 
-    #[ORM\OneToOne(targetEntity: File::class)]
+    #[ORM\OneToOne(targetEntity: UserPhoto::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private ?File $photo = null;
+    private ?UserPhoto $photo = null;
 
     public function __construct()
     {
@@ -165,12 +165,12 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPhoto(): ?File
+    public function getPhoto(): ?UserPhoto
     {
         return $this->photo;
     }
 
-    public function setPhoto(?File $file): self
+    public function setPhoto(?UserPhoto $file): self
     {
         $this->photo = $file;
         return $this;

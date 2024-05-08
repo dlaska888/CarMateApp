@@ -6,12 +6,13 @@ use Symfony\Component\Uid\Uuid;
 
 class GetUserDto
 {
-    public ?Uuid $id;
+    public ?Uuid $id = null;
 
-    public ?string $username;
+    public ?string $username = null;
 
-    public ?string $email;
+    public ?string $email = null;
 
-    public ?array $roles;
+    public ?array $roles = null;
 
+    public ?Uuid $photoId = null;
 }

@@ -12,4 +12,18 @@ class MaintenanceRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Maintenance::class);
     }
+    
+    public function findMaintenancesByDates($carId, $startDate, $endDate)
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.car = :carId')
+            ->andWhere('m.dueDate BETWEEN :startDate AND :endDate')
+            ->andWhere('m.cost IS NOT NULL')
+            ->orderBy('m.dueDate', 'ASC')
+            ->setParameter('carId', $carId)
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getResult();
+    }
 }

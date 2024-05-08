@@ -1,20 +1,24 @@
+import 'package:flutter_frontend/models/maintenance.dart';
+
 class Car {
-  final String? id;
-  final String? name;
-  final String? model;
-  final String? brand;
-  final double? displacement;
-  final DateTime? productionDate;
-  final int? mileage;
-  final DateTime? purchaseDate;
-  final String? plate;
-  final String? vin;
-  final List<dynamic> maintenances;
+  String id;
+  String name;
+  String? model;
+  String? brand;
+  double? displacement;
+  DateTime? productionDate;
+  int? mileage;
+  DateTime? purchaseDate;
+  String? plate;
+  String? vin;
+  String? currentPhotoId;
+  List<Maintenance> maintenances = [];
+  List<String> photosIds = [];
 
   Car({
-    this.id,
-    this.name,
-    this.model,
+    required this.id,
+    required this.name,
+    this.model, 
     this.brand,
     this.displacement,
     this.productionDate,
@@ -22,22 +26,49 @@ class Car {
     this.purchaseDate,
     this.plate,
     this.vin,
-    required this.maintenances,
+    this.currentPhotoId,
+    this.maintenances = const [],
+    this.photosIds = const [],
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'model': model,
+      'brand': brand,
+      'displacement': displacement,
+      'productionDate': productionDate?.toIso8601String(),
+      'mileage': mileage,
+      'purchaseDate': purchaseDate?.toIso8601String(),
+      'plate': plate,
+      'vin': vin,
+      'currentPhotoId': currentPhotoId,
+      // maintenances are not included in the JSON
+      // photos are not included in the JSON
+    };
+  }
+
   factory Car.fromJson(Map<String, dynamic> json) {
+    final maintenances =
+        List<Maintenance>.from(json['maintenances'].map((maintenance) {
+      return Maintenance.fromJson(maintenance);
+    }));
+
     return Car(
       id: json['id'],
       name: json['name'],
       model: json['model'],
       brand: json['brand'],
-      displacement: json['displacement'].toDouble(),
-      productionDate: DateTime.parse(json['productionDate']),
+      displacement: json['displacement'],
+      productionDate: DateTime.tryParse(json['productionDate'] ?? ''),
       mileage: json['mileage'],
-      purchaseDate: DateTime.parse(json['purchaseDate']),
+      purchaseDate: DateTime.tryParse(json['purchaseDate'] ?? ''),
       plate: json['plate'],
-      vin: json['VIN'],
-      maintenances: json['maintenances'],
+      vin: json['vin'],
+      currentPhotoId: json['currentPhotoId'],
+      maintenances: maintenances,
+      photosIds: List<String>.from(json['photosIds']),
     );
   }
 }

@@ -9,18 +9,18 @@ class CreateMaintenanceDto
 {
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 50)]
-    public ?string $name;
+    public ?string $name = null;
 
     #[Assert\Length(max: 255)]
-    public ?string $description;
+    public ?string $description = null;
 
     #[Assert\PositiveOrZero]
-    public ?int $dueMileage;
+    public ?int $dueMileage = null;
 
     #[Assert\Type(type: 'DateTimeInterface')]
-    public ?DateTimeInterface $dueDate;
+    public ?DateTimeInterface $dueDate = null;
 
     #[Assert\PositiveOrZero]
-    public ?string $cost;
+    public ?string $cost = null;
 
 }

@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
-use App\Dto\UserRegisterDto;
+use App\Dto\Security\GetTokenDto;
+use App\Dto\Security\UserRegisterDto;
 use App\Entity\CarMateUser;
 use AutoMapperPlus\AutoMapperInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +18,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(path: '/api', name: 'api_')]
+#[OA\Tag(name: 'Security')]
+#[OA\Response(response: '500', description: 'Internal server error')]
 class SecurityController extends AbstractController
 {
     public function __construct(
@@ -25,13 +29,16 @@ class SecurityController extends AbstractController
         private readonly AutoMapperInterface $autoMapper,
     ){}
 
-    #[Route('/register', name: 'app_register')]
+
+    #[Route('/register', name: 'app_register', methods: ['POST'])]
+    #[OA\Response(response: '201', description: 'User registered', content : new OA\JsonContent(type: GetTokenDto::class))]
+    #[OA\Response(response: '400', description: 'Bad request')]
     public function register(#[MapRequestPayload]
                              UserRegisterDto $registerDto): Response
     {
         $find = $this->entityManager
             ->getRepository(CarMateUser::class)
-            ->findBy(["email" => $registerDto->getEmail()]);
+            ->findBy(["email" => $registerDto->email]);
 
         if ($find) {
             throw new BadRequestException("User already exists");
@@ -39,7 +46,7 @@ class SecurityController extends AbstractController
 
         $find = $this->entityManager
             ->getRepository(CarMateUser::class)
-            ->findBy(["username" => $registerDto->getUsername()]);
+            ->findBy(["username" => $registerDto->username]);
 
         if ($find) {
             throw new BadRequestException("User already exists");
@@ -49,7 +56,7 @@ class SecurityController extends AbstractController
         $user->setPassword(
             $this->userPasswordHasher->hashPassword(
                 $user,
-                $registerDto->getPassword()
+                $registerDto->password
             )
         );
 

@@ -7,25 +7,29 @@ use Symfony\Component\Uid\Uuid;
 
 class GetCarDto
 {
-    public ?Uuid $id;
+    public ?Uuid $id = null;
 
-    public ?string $name;
+    public ?string $name = null;
 
-    public ?string $model;
+    public ?string $model = null;
 
-    public ?string $brand;
+    public ?string $brand = null;
 
-    public ?float $displacement;
+    public ?float $displacement = null;
 
-    public ?DateTimeInterface $productionDate;
+    public ?DateTimeInterface $productionDate = null;
 
-    public ?int $mileage;
+    public ?int $mileage = null;
 
-    public ?DateTimeInterface $purchaseDate;
+    public ?DateTimeInterface $purchaseDate = null;
 
-    public ?string $plate;
+    public ?string $plate = null;
 
-    public ?string $VIN;
+    public ?string $vin = null;
+    
+    public ?Uuid $currentPhotoId = null;
 
     public array $maintenances;
+    
+    public array $photosIds;
 }

@@ -1,37 +1,126 @@
+import 'dart:developer';
+
+import 'package:datepicker_dropdown/datepicker_dropdown.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/models/maintenance.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class ExpensesPage extends StatelessWidget {
-  const ExpensesPage({super.key});
+class ExpensesPage extends StatefulWidget {
+  final String selectedCarId;
+  const ExpensesPage(this.selectedCarId, {super.key});
+
+  @override
+  State<ExpensesPage> createState() => _ExpensesPageState();
+}
+
+class _ExpensesPageState extends State<ExpensesPage> {
+  late List<Maintenance> _maintenanceList;
+  DateTime _selectedDate = DateTime.now();
+
+  Future<List<Maintenance>> fetchData() async {
+    var startDate =
+        DateFormat('yyyy-MM-dd').format(DateTime(_selectedDate.year));
+    var endDate = DateFormat('yyyy-MM-dd').format(
+        DateTime(_selectedDate.year + 1).subtract(const Duration(days: 1)));
+
+    return ApiClient.sendRequest(
+            '${ApiEndpoints.carsEndpoint}/${widget.selectedCarId}/maintenances/by-dates?startDate=$startDate&endDate=$endDate',
+            authorizedRequest: true)
+        .then((data) {
+      return List<Maintenance>.from(data.map((m) => Maintenance.fromJson(m)));
+    }).catchError((error) {
+      log('$error');
+      return <Maintenance>[];
+    });
+  }
+
+  Map<DateTime, double> getMonthlyCostMap(List<Maintenance> maintenanceList) {
+    Map<DateTime, double> monthMap = {
+      for (var i = 1; i <= 12; i++) DateTime(_selectedDate.year, i): 0,
+    };
+
+    for (var maintenance in maintenanceList) {
+      var key = DateTime(maintenance.dueDate!.year, maintenance.dueDate!.month);
+      var cost = double.parse(maintenance.cost!);
+      monthMap[key] = (monthMap[key] ?? 0) + cost;
+    }
+
+    return monthMap;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: Center(
-            child: SfCartesianChart(
-                primaryXAxis: const CategoryAxis(),
-                // Chart title
-                title: const ChartTitle(text: 'Half yearly expenses'),
-                // Enable legend
-                series: <LineSeries<ExpensesData, String>>[
-          LineSeries<ExpensesData, String>(
-              dataSource: <ExpensesData>[
-                ExpensesData('Jan', 350),
-                ExpensesData('Feb', 300),
-                ExpensesData('Mar', 600),
-                ExpensesData('Apr', 400),
-                ExpensesData('May', 500)
-              ],
-              xValueMapper: (ExpensesData sales, _) => sales.year,
-              yValueMapper: (ExpensesData sales, _) => sales.sales,
-              // Enable data label
-              dataLabelSettings: const DataLabelSettings(isVisible: true))
-        ])));
-  }
-}
+    return FutureBuilder(
+      future: fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          log("Error loading home: ${snapshot.error}");
+          return const Center(
+            child: Text("Could not load car"),
+          );
+        }
 
-class ExpensesData {
-  ExpensesData(this.year, this.sales);
-  final String year;
-  final double sales;
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        _maintenanceList = snapshot.data!;
+        var monthlyCostMap = getMonthlyCostMap(_maintenanceList);
+
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: DropdownDatePicker(
+                  showDay: false,
+                  showMonth: false,
+                  startYear: 1900,
+                  endYear: 2100,
+                  selectedYear: _selectedDate.year,
+                  onChangedYear: (year) {
+                    setState(() {
+                      _selectedDate = DateTime(int.parse(year!));
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                  child: SfCartesianChart(
+                      primaryXAxis: DateTimeAxis(
+                        interval: 1,
+                        minimum: DateTime(_selectedDate.year, 1, 1),
+                        maximum: DateTime(_selectedDate.year, 12, 1),
+                        intervalType: DateTimeIntervalType.months,
+                        dateFormat: DateFormat.MMM(),
+                      ),
+                      title: const ChartTitle(text: 'Your expenses'),
+                      series: <ColumnSeries<MapEntry<DateTime, double>,
+                          DateTime>>[
+                    ColumnSeries<MapEntry<DateTime, double>, DateTime>(
+                      dataSource: monthlyCostMap.entries.toList(),
+                      xValueMapper: (monthCost, _) => monthCost.key,
+                      yValueMapper: (monthCost, _) => monthCost.value,
+                      // Enable data label
+                      dataLabelSettings: const DataLabelSettings(
+                          isVisible: true, textStyle: TextStyle(fontSize: 16)),
+                      dataLabelMapper: (monthCost, _) => monthCost.value != 0
+                          ? '\$${monthCost.value.toStringAsFixed(2)}'
+                          : null,
+                    )
+                  ])),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
