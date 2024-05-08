@@ -4,7 +4,9 @@ namespace App\MappingProfiles;
 
 use App\Dto\Car\GetCarDto;
 use App\Dto\Maintenance\GetMaintenanceDto;
+use App\Dto\User\GetUserDto;
 use App\Entity\Car;
+use App\Entity\CarMateUser;
 use AutoMapperPlus\AutoMapperInterface;
 use AutoMapperPlus\AutoMapperPlusBundle\AutoMapperConfiguratorInterface;
 use AutoMapperPlus\Configuration\AutoMapperConfigInterface;
@@ -24,5 +26,10 @@ class AutoMapperConfig implements AutoMapperConfiguratorInterface
             ->forMember('photosIds', function (Car $car) {
                 return $car->getPhotos()->map(fn($photo) => $photo?->getId())->toArray();
             });
+
+        $config->registerMapping(CarMateUser::class, GetUserDto::class)
+            ->forMember('roles', fn(CarMateUser $user) => $user->getRoles())
+            ->forMember('photoId', fn(CarMateUser $user) => $user->getPhoto()?->getId());
+        
     }
 }

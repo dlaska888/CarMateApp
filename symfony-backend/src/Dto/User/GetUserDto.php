@@ -14,4 +14,5 @@ class GetUserDto
 
     public ?array $roles = null;
 
+    public ?Uuid $photoId = null;
 }

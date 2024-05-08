@@ -9,11 +9,15 @@ use App\Entity\Maintenance;
 use App\Repository\CarRepository;
 use App\Repository\MaintenanceRepository;
 use AutoMapperPlus\AutoMapperInterface;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -43,6 +47,35 @@ class MaintenanceController extends AbstractController
         }
 
         $maintenances = $this->maintenanceRepository->findBy(['car' => $car]);
+
+        $getMaintenancesDtos = $this->autoMapper->mapMultiple($maintenances, GetMaintenanceDto::class);
+        $json = $this->serializer->serialize($getMaintenancesDtos, JsonEncoder::FORMAT);
+
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
+    }
+
+    #[Route('/by-dates', methods: ['GET'])]
+    public function getAllByDates(Uuid   $carId, #[MapQueryParameter]
+    string                               $startDate, #[MapQueryParameter]
+                                  string $endDate): JsonResponse
+    {
+        $car = $this->carRepository->find($carId);
+        if (!$car) {
+            throw new BadRequestException('Car not found');
+        }
+
+        try {
+            $startDate = new DateTime($startDate);
+            $endDate = new DateTime($endDate);
+        } catch (Exception) {
+            throw new BadRequestException('Invalid date format');
+        }
+
+        if ($startDate > $endDate) {
+            throw new BadRequestException('Start date must be before end date');
+        }
+
+        $maintenances = $this->maintenanceRepository->findMaintenancesByDates($carId, $startDate, $endDate);
 
         $getMaintenancesDtos = $this->autoMapper->mapMultiple($maintenances, GetMaintenanceDto::class);
         $json = $this->serializer->serialize($getMaintenancesDtos, JsonEncoder::FORMAT);

@@ -7,24 +7,29 @@ use App\Dto\User\GetUserDto;
 use App\Dto\User\ChangePasswordDto;
 use App\Dto\User\ChangeUsernameDto;
 use App\Entity\CarMateUser;
-use App\Entity\File;
 use App\Entity\UserPhoto;
 use App\Repository\CarMateUserRepository;
+use App\Repository\FileRepository;
 use AutoMapperPlus\AutoMapperInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use OpenApi\Attributes as OA;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/account')]
@@ -38,7 +43,8 @@ class AccountController extends AbstractController
         private readonly EntityManagerInterface      $entityManager,
         private readonly SluggerInterface            $slugger,
         private readonly ValidatorInterface          $validator,
-        private readonly UserPasswordHasherInterface $passwordHasher
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly FileRepository              $fileRepository
     )
     {
     }
@@ -58,10 +64,16 @@ class AccountController extends AbstractController
                                    ChangeUsernameDto $dto): JsonResponse
     {
         if ($this->userRepository->findBy(['username' => $dto->username])) {
-            return new JsonResponse('Username already taken', Response::HTTP_CONFLICT);
+            throw new ConflictHttpException('Username already taken');
         }
 
+        /** @var CarMateUser $user */
         $user = $this->getUser();
+        
+        if (!$this->passwordHasher->isPasswordValid($user, $dto->password)) {
+            throw new BadRequestException('Password is incorrect');
+        }
+        
         $user->setUsername($dto->username);
         $this->entityManager->flush();
 
@@ -76,13 +88,13 @@ class AccountController extends AbstractController
         $user = $this->getUser();
 
         if (!$this->passwordHasher->isPasswordValid($user, $dto->password)) {
-            return new JsonResponse('Password is incorrect', Response::HTTP_BAD_REQUEST);
+            throw new BadRequestException('Password is incorrect');
         }
 
         $user->setPassword(
             $this->passwordHasher->hashPassword(
                 $user,
-                $dto->password
+                $dto->newPassword 
             )
         );
         $this->entityManager->flush();
@@ -90,14 +102,18 @@ class AccountController extends AbstractController
         return new JsonResponse('Password updated', Response::HTTP_OK);
     }
 
-    #[Route('/profile-photo', methods: ['GET'])]
-    public function getPhoto(): Response
+    #[Route('/profile-photo/{profilePhotoId}', methods: ['GET'])]
+    public function getPhoto(Uuid $profilePhotoId): Response
     {
-        /* @var CarMateUser $user */
         $user = $this->getUser();
-        $photo = $user->getPhoto();
+        
+        if (!$user->getPhoto()) {
+            throw new BadRequestException('No photo uploaded');
+        }
+        
+        $photo = $this->fileRepository->find($profilePhotoId);
         if (!$photo) {
-            return new JsonResponse('No photo uploaded', Response::HTTP_NOT_FOUND);
+            throw new NotFoundHttpException('No photo found');
         }
 
         $path = $this->getParameter('user_photos_directory') . '/' . $photo->getName();
@@ -132,7 +148,7 @@ class AccountController extends AbstractController
                 $newFilename
             );
         } catch (FileException) {
-            return new JsonResponse('Failed to upload photo', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         $file = new UserPhoto();
@@ -143,7 +159,7 @@ class AccountController extends AbstractController
         $user->setPhoto($file);
         $this->entityManager->flush();
 
-        return new JsonResponse('Photo uploaded', Response::HTTP_OK);
+        return new JsonResponse($file->getId(), Response::HTTP_OK);
     }
 
     #[Route('/profile-photo', methods: ['DELETE'])]
@@ -153,7 +169,7 @@ class AccountController extends AbstractController
         $user = $this->getUser();
         $photo = $user->getPhoto();
         if (!$photo) {
-            return new JsonResponse('No photo uploaded', Response::HTTP_NOT_FOUND);
+            throw new BadRequestException('No photo uploaded');
         }
 
         $this->removePhoto($user);
