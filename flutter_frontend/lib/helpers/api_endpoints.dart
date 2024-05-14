@@ -6,3 +6,4 @@ class ApiEndpoints {
   static String accountEndpoint = '$baseUrl/account';
   static String carsEndpoint = '$baseUrl/cars';
 }
+ 

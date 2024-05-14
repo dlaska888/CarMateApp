@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car_mate_user.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/user_avatar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +19,7 @@ class DashboardDrawer extends StatefulWidget {
 }
 
 class _DashboardDrawerState extends State<DashboardDrawer> {
-  late CarMateUser _user;
+  late Future<CarMateUser> _futureUser;
 
   Future<CarMateUser> fetchUser() {
     return ApiClient.sendRequest("${ApiEndpoints.accountEndpoint}/me",
@@ -33,10 +33,16 @@ class _DashboardDrawerState extends State<DashboardDrawer> {
   }
 
   @override
+  initState() {
+    super.initState();
+    _futureUser = fetchUser();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).primaryColor;
     return FutureBuilder(
-      future: fetchUser(),
+      future: _futureUser,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           log("Error loading settings: ${snapshot.error}");
@@ -51,7 +57,8 @@ class _DashboardDrawerState extends State<DashboardDrawer> {
           );
         }
 
-        _user = snapshot.data as CarMateUser;
+        final user = snapshot.data as CarMateUser;
+
         return Drawer(
             backgroundColor: primary,
             width: MediaQuery.of(context).size.width,
@@ -79,15 +86,15 @@ class _DashboardDrawerState extends State<DashboardDrawer> {
                   ),
                   Column(
                     children: [
-                      UserAvatar(_user),
+                      UserAvatar(user),
                       const SizedBox(height: 32),
                       Column(children: [
-                        Text(_user.username,
+                        Text(user.username,
                             style: Theme.of(context)
                                 .textTheme
                                 .displayLarge!
                                 .copyWith(fontSize: 16.0)),
-                        Text(_user.email,
+                        Text(user.email,
                             style: Theme.of(context)
                                 .textTheme
                                 .displayLarge!

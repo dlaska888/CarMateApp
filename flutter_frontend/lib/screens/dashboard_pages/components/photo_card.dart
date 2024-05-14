@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 
 class PhotoCard extends StatefulWidget {
@@ -17,11 +17,19 @@ class PhotoCard extends StatefulWidget {
 }
 
 class _PhotoCardState extends State<PhotoCard> {
+  late Future<String?> _futureToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureToken = ApiClient.getUserToken();
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).primaryColor;
     return FutureBuilder(
-      future: ApiClient.getUserToken(),
+      future: _futureToken,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return ConstrainedBox(

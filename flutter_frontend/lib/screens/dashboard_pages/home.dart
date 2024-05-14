@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home_components/car_card.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home_components/maintenances_list.dart';
 
@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Car _car;
+  late Future<Car> _futureCar;
 
   Future<Car> fetchCar() async {
     return ApiClient.sendRequest(
@@ -32,17 +32,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void refreshCar() {
-    fetchCar().then((car) {
-      setState(() {
-        _car = car;
-      });
+    setState(() {
+      _futureCar = fetchCar();
     });
   }
 
   @override
   void initState() {
     super.initState();
-    refreshCar();
+    _futureCar = fetchCar();
   }
 
   @override
@@ -50,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder(
-        future: fetchCar(),
+        future: _futureCar,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             log("Error loading home: ${snapshot.error}");
@@ -65,7 +63,7 @@ class _HomePageState extends State<HomePage> {
             );
           }
 
-          _car = snapshot.data!;
+          final Car car = snapshot.data as Car;
           return Container(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -78,9 +76,9 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MaintenanceList(_car, refreshCar),
+                      MaintenanceList(car, refreshCar),
                       if (screenWidth > 1000) const SizedBox(width: 50),
-                      if (screenWidth > 768) CarCard(_car)
+                      if (screenWidth > 768) CarCard(car)
                     ],
                   )
                 ],

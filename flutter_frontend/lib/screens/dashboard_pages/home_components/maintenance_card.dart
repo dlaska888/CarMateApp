@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home_components/maintenance_info.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';
 import 'package:flutter_frontend/screens/forms/maintenances/delete_maintenance.dart';
@@ -64,6 +64,17 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
     if (isMaintenanceDeleted) {
       return const SizedBox();
     }
+
+    final numberFormat = NumberFormat('###,###,###');
+    final maintenanceMilageInterval = _maintenance.mileageInterval != null
+        ? numberFormat.format(_maintenance.mileageInterval)
+        : null;
+
+    final maintenanceDateInterval = _maintenance.dateInterval?.toString();
+    final maintenanceDueDate =
+        _maintenance.dueDate != null && maintenanceDateInterval == null
+            ? DateFormat('d MMMM yyyy').format(_maintenance.dueDate!)
+            : null;
 
     return GestureDetector(
       onTap: () => FormModal(context).showModal(MaintenanceInfo(_maintenance)),
@@ -146,9 +157,29 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
                             style: const TextStyle(
                                 fontSize: 16.0, fontWeight: FontWeight.bold),
                           ),
-                          if (_maintenance.dueDate != null)
-                            Text(
-                                'Due date: ${DateFormat('d MMMM yyyy').format(_maintenance.dueDate!)}'),
+                          if (maintenanceDateInterval != null ||
+                              _maintenance.mileageInterval != null)
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  if (maintenanceDateInterval != null)
+                                    TextSpan(
+                                      text: 'Every: $maintenanceDateInterval',
+                                    ),
+                                  if (maintenanceDateInterval != null &&
+                                      _maintenance.mileageInterval != null)
+                                    const TextSpan(
+                                      text: ' or ',
+                                    ),
+                                  if (_maintenance.mileageInterval != null)
+                                    TextSpan(
+                                      text: '$maintenanceMilageInterval km',
+                                    ),
+                                ],
+                              ),
+                            ),
+                          if (maintenanceDueDate != null)
+                            Text('Due date: $maintenanceDueDate'),
                           if (_maintenance.dueMileage != null)
                             Text('Due mileage: ${_maintenance.dueMileage} km'),
                         ],

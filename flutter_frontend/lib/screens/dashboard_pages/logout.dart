@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
 import 'package:go_router/go_router.dart';
 
 class LogoutPage extends StatelessWidget {

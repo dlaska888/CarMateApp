@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car_mate_user.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/user_avatar.dart';
 import 'package:flutter_frontend/screens/forms/account/change_password.dart';
 import 'package:flutter_frontend/screens/forms/account/change_username.dart';
@@ -20,7 +20,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late CarMateUser _user;
+  late Future<CarMateUser> _futureUser;
 
   Future<CarMateUser> fetchUser() {
     return ApiClient.sendRequest("${ApiEndpoints.accountEndpoint}/me",
@@ -34,11 +34,15 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void addPhoto() {
-    fetchUser().then((user) {
-      setState(() {
-        _user = user;
-      });
+    setState(() {
+      _futureUser = fetchUser();
     });
+  }
+
+  @override
+  initState() {
+    super.initState();
+    _futureUser = fetchUser();
   }
 
   @override
@@ -47,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder(
-      future: fetchUser(),
+      future: _futureUser,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           log("Error loading settings: ${snapshot.error}");
@@ -62,7 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         }
 
-        _user = snapshot.data as CarMateUser;
+        final user = snapshot.data as CarMateUser;
         return SingleChildScrollView(
           child: Column(
             mainAxisAlignment: screenWidth > 768
@@ -112,15 +116,15 @@ class _SettingsPageState extends State<SettingsPage> {
                                                 '${ApiEndpoints.accountEndpoint}/profile-photo',
                                                 addPhoto));
                                       },
-                                      child: UserAvatar(_user)),
+                                      child: UserAvatar(user)),
                                   const SizedBox(height: 32),
                                   Column(children: [
-                                    Text(_user.username,
+                                    Text(user.username,
                                         style: TextStyle(
                                             fontSize: 32.0,
                                             fontWeight: FontWeight.bold,
                                             color: primary)),
-                                    Text(_user.email,
+                                    Text(user.email,
                                         style: TextStyle(
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.bold,

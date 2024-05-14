@@ -1,12 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
-import 'package:flutter_frontend/local_preferences_manager.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/local_preferences_manager.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/paged_results.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/my_cars_components/car_tile.dart';
 import 'package:flutter_frontend/screens/forms/cars/add_car.dart';
 import 'package:flutter_frontend/screens/forms/form_modal.dart';

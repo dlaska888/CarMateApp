@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/local_preferences_manager.dart';
+import 'package:flutter_frontend/helpers/local_preferences_manager.dart';
 import 'package:flutter_frontend/screens/dashboard_components/drawer.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/add_first_car.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/home.dart';

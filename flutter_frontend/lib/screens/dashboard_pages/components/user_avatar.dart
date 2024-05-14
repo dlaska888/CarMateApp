@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_network_image_platform_interface/cached_network_image_platform_interface.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car_mate_user.dart';
 
 class UserAvatar extends StatefulWidget {
@@ -14,13 +14,21 @@ class UserAvatar extends StatefulWidget {
 }
 
 class _UserAvatarState extends State<UserAvatar> {
+  late Future<String?> _futureToken;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureToken = ApiClient.getUserToken();
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).primaryColor;
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder(
-      future: ApiClient.getUserToken(),
+      future: _futureToken,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return ConstrainedBox(

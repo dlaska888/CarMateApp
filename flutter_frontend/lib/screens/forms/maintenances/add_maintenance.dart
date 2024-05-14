@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/forms/form_helper.dart';
+import 'package:flutter_frontend/screens/forms/interval_picker.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
+import 'package:iso8601_duration/iso8601_duration.dart';
 
 class AddMaintenanceForm extends StatefulWidget {
   final Car car;
@@ -22,7 +24,8 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionFocusNode = FocusNode();
   final _maintenance = Maintenance(id: "", name: "");
-  final dueDateController = TextEditingController();
+  final _dueDateController = TextEditingController();
+  final _dateIntervalController = TextEditingController();
   var _isLoading = false;
 
   void _submitMaintenance() {
@@ -73,7 +76,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 500),
+                constraints: const BoxConstraints(maxHeight: 700),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -126,11 +129,24 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
+                        labelText: 'Mileage Interval',
+                      ),
+                      validator: FormHelper.validateIntInput,
+                      keyboardType: TextInputType.number,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      onSaved: (value) {
+                        setState(() {
+                          _maintenance.mileageInterval = int.tryParse(value!);
+                        });
+                      },
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(
                           labelText: 'Due Date',
                           filled: true,
                           prefixIcon: Icon(Icons.calendar_today)),
                       readOnly: true,
-                      controller: dueDateController,
+                      controller: _dueDateController,
                       onTap: () async {
                         var picked = await showDatePicker(
                             context: context,
@@ -138,7 +154,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                             lastDate: DateTime(2101));
                         if (picked != null) {
                           setState(() {
-                            dueDateController.text =
+                            _dueDateController.text =
                                 picked.toString().split(" ")[0];
                           });
                         }
@@ -146,8 +162,29 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                       onSaved: (value) {
                         setState(() {
                           _maintenance.dueDate =
-                              DateTime.tryParse(dueDateController.text);
+                              DateTime.tryParse(_dueDateController.text);
                         });
+                      },
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: 'Date Interval',
+                          filled: true,
+                          prefixIcon: Icon(Icons.cached)),
+                      readOnly: true,
+                      controller: _dateIntervalController,
+                      onTap: () async {
+                        var picked =
+                            await IntervalPicker.showDateIntervalPicker(
+                                context: context);
+                        if (picked != null) {
+                          final date = ISODurationConverter()
+                              .parseString(isoDurationString: picked);
+                          setState(() {
+                            _dateIntervalController.text = date.toString();
+                            _maintenance.dateInterval = date;
+                          });
+                        }
                       },
                     ),
                     TextFormField(

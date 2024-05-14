@@ -1,11 +1,9 @@
 import 'dart:developer';
 
 import 'package:datepicker_dropdown/datepicker_dropdown.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -19,10 +17,10 @@ class ExpensesPage extends StatefulWidget {
 }
 
 class _ExpensesPageState extends State<ExpensesPage> {
-  late List<Maintenance> _maintenanceList;
   DateTime _selectedDate = DateTime.now();
+  late Future<List<Maintenance>> _futureMaintenances;
 
-  Future<List<Maintenance>> fetchData() async {
+  Future<List<Maintenance>> fetchMaintenances() async {
     var startDate =
         DateFormat('yyyy-MM-dd').format(DateTime(_selectedDate.year));
     var endDate = DateFormat('yyyy-MM-dd').format(
@@ -30,7 +28,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
     return ApiClient.sendRequest(
             '${ApiEndpoints.carsEndpoint}/${widget.selectedCarId}/maintenances/by-dates?startDate=$startDate&endDate=$endDate',
-            authorizedRequest: true)
+            authorizedRequest: true) 
         .then((data) {
       return List<Maintenance>.from(data.map((m) => Maintenance.fromJson(m)));
     }).catchError((error) {
@@ -54,9 +52,15 @@ class _ExpensesPageState extends State<ExpensesPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _futureMaintenances = fetchMaintenances();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchData(),
+      future: _futureMaintenances,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           log("Error loading home: ${snapshot.error}");
@@ -71,8 +75,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
           );
         }
 
-        _maintenanceList = snapshot.data!;
-        var monthlyCostMap = getMonthlyCostMap(_maintenanceList);
+        final maintenanceList = snapshot.data!;
+        final monthlyCostMap = getMonthlyCostMap(maintenanceList);
 
         return Padding(
           padding: const EdgeInsets.all(8.0),

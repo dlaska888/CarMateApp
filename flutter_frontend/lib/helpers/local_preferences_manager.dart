@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/paged_results.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
