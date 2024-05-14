@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\MaintenanceRepository;
+use DateInterval;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -26,8 +27,14 @@ class Maintenance
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $dueMileage = null;
 
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $mileageInterval = null;
+
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTimeInterface $dueDate = null;
+    
+    #[ORM\Column(type: "dateinterval", nullable: true)]
+    private ?DateInterval $dateInterval = null;
 
     #[ORM\Column(type: "decimal", nullable: true)]
     private ?string $cost = null;

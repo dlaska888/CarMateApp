@@ -57,7 +57,7 @@ class CarController extends AbstractController
 
         $query = $this->entityManager->createQueryBuilder()
             ->select('c')
-            ->from('App\Entity\Car', 'c')
+            ->from(Car::class, 'c')
             ->where('c.user = :user')
             ->setParameter('user', $user)
             ->getQuery();
