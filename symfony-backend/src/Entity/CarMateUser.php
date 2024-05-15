@@ -47,6 +47,9 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: true)]
     private ?UserPhoto $photo = null;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $google = null;
+
     public function __construct()
     {
         $this->cars = new ArrayCollection();
@@ -173,6 +176,17 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?UserPhoto $file): self
     {
         $this->photo = $file;
+        return $this;
+    }
+
+    public function getGoogle(): ?string
+    {
+        return $this->google;
+    }
+
+    public function setGoogle(?string $google): CarMateUser
+    {
+        $this->google = $google;
         return $this;
     }
 }

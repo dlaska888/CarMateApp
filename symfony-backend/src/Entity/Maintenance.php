@@ -83,10 +83,34 @@ class Maintenance
 
         return $this;
     }
+    
+    public function getMileageInterval(): ?int
+    {
+        return $this->mileageInterval;
+    }
+    
+    public function setMileageInterval(?int $mileageInterval): self
+    {
+        $this->mileageInterval = $mileageInterval;
+        
+        return $this;
+    }
 
     public function getDueDate(): ?DateTimeInterface
     {
         return $this->dueDate;
+    }
+    
+    public function getDateInterval(): ?DateInterval
+    {
+        return $this->dateInterval;
+    }
+    
+    public function setDateInterval(?DateInterval $dateInterval): self
+    {
+        $this->dateInterval = $dateInterval;
+        
+        return $this;
     }
 
     public function setDueDate(?DateTimeInterface $dueDate): self

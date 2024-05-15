@@ -12,8 +12,8 @@ class MaintenanceRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Maintenance::class);
     }
-    
-    public function findMaintenancesByDates($carId, $startDate, $endDate)
+
+    public function findMaintenancesByDates($carId, $startDate, $endDate) : mixed
     {
         return $this->createQueryBuilder('m')
             ->where('m.car = :carId')
@@ -25,5 +25,35 @@ class MaintenanceRepository extends ServiceEntityRepository
             ->setParameter('endDate', $endDate)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findMaintenancesByDatesWithIntervals($carId, $startDate, $endDate) : array
+    {
+        $maintenances = $this->createQueryBuilder('m')
+            ->where('m.car = :carId')
+            ->andWhere('m.dueDate <= :endDate')
+            ->andWhere('m.cost IS NOT NULL')
+            ->orderBy('m.dueDate', 'ASC')
+            ->setParameter('carId', $carId)
+            ->setParameter('endDate', $endDate)
+            ->getQuery()
+            ->getResult();
+
+        $result = [];
+
+        foreach ($maintenances as $maintenance) {
+            $nextDueDate = clone $maintenance->getDueDate();
+            $intervalDays = $maintenance->getDateInterval();
+
+            while ($nextDueDate <= $endDate) {
+                if ($nextDueDate >= $startDate) {
+                    $maintenance->setDueDate(clone $nextDueDate);
+                    $result[] = clone $maintenance;
+                }
+                $nextDueDate->add($intervalDays);
+            }
+        }
+
+        return $result;
     }
 }

@@ -59,7 +59,7 @@ class Car
 
     #[ORM\OneToMany(targetEntity: CarPhoto::class, mappedBy: "car")]
     private Collection $photos;
-
+    
     public function __construct()
     {
         $this->maintenances = new ArrayCollection();

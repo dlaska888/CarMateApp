@@ -57,7 +57,8 @@ class MaintenanceController extends AbstractController
     #[Route('/by-dates', methods: ['GET'])]
     public function getAllByDates(Uuid   $carId, #[MapQueryParameter]
     string                               $startDate, #[MapQueryParameter]
-                                  string $endDate): JsonResponse
+                                  string $endDate, #[MapQueryParameter]
+                                  bool   $withIntervals = false): JsonResponse
     {
         $car = $this->carRepository->find($carId);
         if (!$car) {
@@ -74,8 +75,12 @@ class MaintenanceController extends AbstractController
         if ($startDate > $endDate) {
             throw new BadRequestException('Start date must be before end date');
         }
-
-        $maintenances = $this->maintenanceRepository->findMaintenancesByDates($carId, $startDate, $endDate);
+        
+        if ($withIntervals) {
+            $maintenances = $this->maintenanceRepository->findMaintenancesByDatesWithIntervals($carId, $startDate, $endDate);
+        } else {
+            $maintenances = $this->maintenanceRepository->findMaintenancesByDates($carId, $startDate, $endDate);
+        }
 
         $getMaintenancesDtos = $this->autoMapper->mapMultiple($maintenances, GetMaintenanceDto::class);
         $json = $this->serializer->serialize($getMaintenancesDtos, JsonEncoder::FORMAT);
@@ -121,7 +126,7 @@ class MaintenanceController extends AbstractController
         $getMaintenanceDto = $this->autoMapper->map($maintenance, GetMaintenanceDto::class);
         $json = $this->serializer->serialize($getMaintenanceDto, JsonEncoder::FORMAT);
 
-        return new JsonResponse($json, Response::HTTP_OK, json: true);
+        return new JsonResponse($json, Response::HTTP_CREATED, json: true);
     }
 
     #[Route('/{maintenanceId}', methods: ['PUT'])]
