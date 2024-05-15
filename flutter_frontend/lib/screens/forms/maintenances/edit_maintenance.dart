@@ -5,7 +5,7 @@ import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
 import 'package:flutter_frontend/helpers/notification_service.dart';
-import 'package:flutter_frontend/screens/forms/form_helper.dart';
+import 'package:flutter_frontend/screens/forms/form_validator.dart';
 import 'package:flutter_frontend/screens/forms/interval_picker.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
@@ -135,7 +135,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       decoration: const InputDecoration(
                         labelText: 'Due Mileage',
                       ),
-                      validator: FormHelper.validateIntInput,
+                      validator: FormValidator.validateIntInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
@@ -149,7 +149,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       decoration: const InputDecoration(
                         labelText: 'Mileage Interval',
                       ),
-                      validator: FormHelper.validateIntInput,
+                      validator: FormValidator.validateIntInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
@@ -206,24 +206,11 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       },
                     ),
                     TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Cost',
-                      ),
-                      validator: FormHelper.validateFloatInput,
-                      keyboardType: TextInputType.number,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      onSaved: (value) {
-                        setState(() {
-                          if (value!.isNotEmpty) _maintenance.cost = value;
-                        });
-                      },
-                    ),
-                    TextFormField(
                       initialValue: _maintenance.cost?.toString(),
                       decoration: const InputDecoration(
                         labelText: 'Cost',
                       ),
-                      validator: FormHelper.validateFloatInput,
+                      validator: FormValidator.validateFloatInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {

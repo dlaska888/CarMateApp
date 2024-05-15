@@ -1,4 +1,4 @@
-class FormHelper {
+class FormValidator {
   static String? validateFloatInput(value, {String? fieldName = 'Field'}) {
     if (value == null || value.isEmpty) {
       return null;
