@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +8,9 @@ import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:sign_in_button/sign_in_button.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -46,6 +50,64 @@ class _LoginState extends State<Login> {
             });
           });
     }
+  }
+
+  void _googleLogin(BuildContext context) async {
+
+    GoogleSignIn googleSignIn = GoogleSignIn(
+      clientId:
+          '102794300888-of05afkrqcrmk8i7l2m9448ecc03dbgl.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
+    );
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await googleSignIn.currentUser?.clearAuthCache();
+      var result = await googleSignIn.signInSilently();
+      result ??= await googleSignIn.signIn();
+
+      if (result == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        NotificationService.showNotification("Google login failed",
+            type: MessageType.error);
+        return;
+      }
+
+      var googleKey = await result.authentication;
+
+      if (googleKey.idToken == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        NotificationService.showNotification("Google login failed",
+            type: MessageType.error);
+        return;
+      }
+
+      var tokens =
+          await ApiClient.sendRequest("${ApiEndpoints.baseUrl}/login-google",
+              methodFun: http.post,
+              body: {
+                'idToken': googleKey.idToken,
+              },
+              authorizedRequest: false);
+
+      await ApiClient.login(tokens['token'], tokens['refreshToken']);
+      if (context.mounted) context.go('/dashboard');
+    } catch (error) {
+      NotificationService.showNotification("Google login failed",
+          type: MessageType.error);
+      log('Error: $error');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -108,6 +170,9 @@ class _LoginState extends State<Login> {
                           ? const CircularProgressIndicator()
                           : const Text("Login"),
                     ),
+                    SignInButton(Buttons.google, onPressed: () async {
+                      _googleLogin(context);
+                    }),
                     RichText(
                       text: TextSpan(
                           text: "Don't have an account? Sign up",

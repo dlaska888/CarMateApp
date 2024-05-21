@@ -71,7 +71,7 @@ class ApiClient {
     return result;
   }
 
-  static Future login(String jwt, String refreshToken) async {
+  static Future<void> login(String jwt, String refreshToken) async {
     await _storage.write(key: _jwtKey, value: jwt);
     await _storage.write(key: _jwtRefreshKey, value: refreshToken);
   }

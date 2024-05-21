@@ -7,7 +7,8 @@
         {
             "name": "flutter_frontend",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": ["-d", "web-server","--web-port", "51000"],
         },
         {
             "name": "flutter_frontend (profile mode)",

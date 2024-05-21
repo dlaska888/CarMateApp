@@ -81,7 +81,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     final mainPhotoWidth = screenWidth > 1100.0 ? 1000.0 : screenWidth * 0.9;
-    final mainPhotoHeight = screenHeight > 800.0 ? 650.0 : screenHeight * 0.7;
+    final mainPhotoHeight = screenHeight * 0.6;
 
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       SizedBox(
