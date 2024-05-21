@@ -27,16 +27,6 @@ security:
         main:
             lazy: true
             provider: app_user_provider
-            oauth:
-                resource_owners:
-                    google: "/login/check-google"
-                login_path: /login
-                use_forward: false
-                failure_path: /login
-
-                oauth_user_provider:
-                    service: App\Security\Providers\OAuthUserProvider
-                
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -46,7 +36,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/(login|register|refresh|doc), roles: PUBLIC_ACCESS }
+        - { path: ^/api/(login|login-google|register|refresh|doc), roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
