@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User Details{% endblock %}
+
+{% block body %}
+    <h1>{{ user.username }}</h1>
+    <p>ID: {{ user.id }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>Roles: {{ user.roles|join(', ') }}</p>
+    {% if editable %}
+    <a href="{{ path('user_edit', {'id': user.id}) }}">Edit</a>
+    <form action="{{ path('user_delete', {'id': user.id}) }}" method="post" onsubmit="return confirm('Are you sure?');">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit">Delete</button>
+    </form>
+    {% endif %}
+    <a href="{{ path('user_index') }}">Back to list</a>
+{% endblock %}

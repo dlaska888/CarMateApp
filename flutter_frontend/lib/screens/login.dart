@@ -1,14 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_frontend/helpers/api_client.dart';
 import 'package:flutter_frontend/helpers/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/google_auth_manager.dart';
 import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -20,6 +18,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final _googleAuthManager = GoogleAuthManager();
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -52,61 +51,25 @@ class _LoginState extends State<Login> {
     }
   }
 
-  void _googleLogin(BuildContext context) async {
-
-    GoogleSignIn googleSignIn = GoogleSignIn(
-      clientId:
-          '102794300888-of05afkrqcrmk8i7l2m9448ecc03dbgl.apps.googleusercontent.com',
-      scopes: ['email', 'profile'],
-    );
-
+  void _googleLogin(BuildContext context) {
     setState(() {
       _isLoading = true;
     });
 
-    try {
-      await googleSignIn.currentUser?.clearAuthCache();
-      var result = await googleSignIn.signInSilently();
-      result ??= await googleSignIn.signIn();
-
-      if (result == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        NotificationService.showNotification("Google login failed",
+    _googleAuthManager.loginWithGoogle().then((success) {
+      if (success) {
+        context.go('/dashboard');
+      } else {
+        NotificationService.showNotification("Error logging in with google",
             type: MessageType.error);
-        return;
       }
-
-      var googleKey = await result.authentication;
-
-      if (googleKey.idToken == null) {
-        setState(() {
-          _isLoading = false;
-        });
-        NotificationService.showNotification("Google login failed",
-            type: MessageType.error);
-        return;
-      }
-
-      var tokens =
-          await ApiClient.sendRequest("${ApiEndpoints.baseUrl}/login-google",
-              methodFun: http.post,
-              body: {
-                'idToken': googleKey.idToken,
-              },
-              authorizedRequest: false);
-
-      await ApiClient.login(tokens['token'], tokens['refreshToken']);
-      if (context.mounted) context.go('/dashboard');
-    } catch (error) {
-      NotificationService.showNotification("Google login failed",
+    }).catchError((error) {
+      NotificationService.showNotification("Error logging in with google",
           type: MessageType.error);
-      log('Error: $error');
-    }
-
-    setState(() {
-      _isLoading = false;
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
     });
   }
 
@@ -137,8 +100,9 @@ class _LoginState extends State<Login> {
                   color: primaryLight,
                   borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                 ),
-                constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height / 2),
+                constraints: const BoxConstraints(
+                  minHeight: 450,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,6 +129,9 @@ class _LoginState extends State<Login> {
                       validator: ValidationBuilder().required().build(),
                     ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(250, 0),
+                      ),
                       onPressed: _submit,
                       child: _isLoading
                           ? const CircularProgressIndicator()
@@ -175,11 +142,22 @@ class _LoginState extends State<Login> {
                     }),
                     RichText(
                       text: TextSpan(
-                          text: "Don't have an account? Sign up",
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 16.0),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => context.go('/register')),
+                        text: "Don't have an account? ",
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 16.0),
+                        children: [
+                          TextSpan(
+                            text: "Sign up",
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => context.go('/login'),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

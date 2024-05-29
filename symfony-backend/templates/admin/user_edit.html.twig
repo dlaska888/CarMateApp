@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block body %}
+    <h1>Edit User</h1>
+    <form action="{{ path('user_edit', {'id': user.id}) }}" method="post">
+        <!-- Include fields for user data -->
+        <input type="text" name="username" value="{{ user.username }}">
+        <input type="email" name="email" value="{{ user.email }}">
+        <select name="roles">
+            {% for role in ["ROLE_USER", "ROLE_ADMIN"] %}
+                <option value="{{ role }}" {% if role in user.roles %}selected{% endif %}>{{ role }}</option>
+            {% endfor %}
+        </select>
+        <!-- Add other necessary fields -->
+        <button type="submit">Save</button>
+    </form>
+{% endblock %}
