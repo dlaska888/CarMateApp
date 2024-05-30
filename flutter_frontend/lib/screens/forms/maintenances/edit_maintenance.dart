@@ -64,7 +64,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
     _dueDateController = TextEditingController(
         text: _maintenance.dueDate?.toString().split(" ")[0]);
     _dateIntervalController =
-        TextEditingController(text: _maintenance.dateInterval.toString());
+        TextEditingController(text: _maintenance.dateInterval?.toString());
   }
 
   @override
@@ -195,7 +195,12 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                         var picked =
                             await IntervalPicker.showDateIntervalPicker(
                                 context: context);
-                        if (picked != null) {
+                        if (picked == "clear") {
+                          setState(() {
+                            _dateIntervalController.text = "";
+                            _maintenance.dateInterval = null;
+                          });
+                        } else if (picked != null) {
                           final date = ISODurationConverter()
                               .parseString(isoDurationString: picked);
                           setState(() {

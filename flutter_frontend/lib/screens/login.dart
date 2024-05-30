@@ -154,7 +154,7 @@ class _LoginState extends State<Login> {
                               fontWeight: FontWeight.bold,
                             ),
                             recognizer: TapGestureRecognizer()
-                              ..onTap = () => context.go('/login'),
+                              ..onTap = () => context.go('/register'),
                           ),
                         ],
                       ),

@@ -41,7 +41,7 @@ class _MonthCostChartState extends State<MonthCostChart> {
                   minimum: DateTime(
                       widget.selectedDate.year, widget.selectedDate.month, 1),
                   maximum: DateTime(
-                      widget.selectedDate.year, widget.selectedDate.month, 31),
+                      widget.selectedDate.year, widget.selectedDate.month + 1, 1),
                   intervalType: DateTimeIntervalType.auto,
                   dateFormat: DateFormat.d(),
                 ),

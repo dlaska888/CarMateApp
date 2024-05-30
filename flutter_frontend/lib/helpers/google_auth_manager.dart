@@ -39,7 +39,7 @@ class GoogleAuthManager {
       await ApiClient.login(tokens['token'], tokens['refreshToken']);
       return true;
     } catch (error) {
-      log('Error occured!', error: error);
+      log('Error occurred!', error: error, stackTrace: StackTrace.current);
       return false;
     }
   }

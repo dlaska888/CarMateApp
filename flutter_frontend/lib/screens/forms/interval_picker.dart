@@ -14,6 +14,12 @@ class IntervalPicker {
           content: IntervalPickerDialog(controller: controller),
           actions: [
             TextButton(
+              onPressed: () {
+                Navigator.pop(context, "clear");
+              },
+              child: const Text('Clear'),
+            ),
+            TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
@@ -21,7 +27,7 @@ class IntervalPicker {
               onPressed: () {
                 Navigator.pop(context, controller.text);
               },
-              child: const Text('OK'),
+              child: const Text('Ok'),
             ),
           ],
         );

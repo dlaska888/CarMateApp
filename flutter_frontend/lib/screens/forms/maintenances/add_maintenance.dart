@@ -142,7 +142,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
-                          labelText: 'Due Date',
+                          labelText: 'Due Date *required for expences',
                           filled: true,
                           prefixIcon: Icon(Icons.calendar_today)),
                       readOnly: true,
@@ -189,7 +189,7 @@ class AddMaintenanceFormState extends State<AddMaintenanceForm> {
                     ),
                     TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Cost',
+                        labelText: 'Cost *required for expences',
                       ),
                       validator: FormValidator.validateFloatInput,
                       keyboardType: TextInputType.number,

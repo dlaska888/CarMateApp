@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/catemateapp_theme.dart';
 import 'package:flutter_frontend/helpers/api_client.dart';
 import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/helpers/google_auth_manager.dart';
