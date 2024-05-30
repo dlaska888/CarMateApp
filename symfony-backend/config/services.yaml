@@ -6,6 +6,10 @@
 parameters:
     user_photos_directory: '%kernel.project_dir%/public/uploads/user_photos'
     car_photos_directory: '%kernel.project_dir%/public/uploads/car_photos'
+    system_mail: 'no-reply@carmate.com'
+    system_name: 'CarMateApp'
+    google_id: '%env(GOOGLE_ID)%'
+    refresh_token_ttl: '%env(int:REFRESH_TOKEN_TTL)%'
 services:
     # default configuration for services in *this* file
     _defaults:

@@ -6,3 +6,4 @@ when@test:
         strict_variables: true
         paths:
             - 'templates/admin'
+            - 'templates/email'

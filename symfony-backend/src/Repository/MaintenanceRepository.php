@@ -42,6 +42,11 @@ class MaintenanceRepository extends ServiceEntityRepository
         $result = [];
 
         foreach ($maintenances as $maintenance) {
+            if($maintenance->getDateInterval() === null) {
+                $result[] = $maintenance;
+                continue;
+            }
+
             $nextDueDate = clone $maintenance->getDueDate();
             $intervalDays = $maintenance->getDateInterval();
 

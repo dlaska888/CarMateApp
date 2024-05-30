@@ -50,6 +50,12 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255, nullable: true)]
     private ?string $google = null;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $confirmationToken = null;
+
+    #[ORM\Column(type: "boolean")]
+    private bool $isEmailConfirmed = false;
+
     public function __construct()
     {
         $this->cars = new ArrayCollection();
@@ -187,6 +193,28 @@ class CarMateUser implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGoogle(?string $google): CarMateUser
     {
         $this->google = $google;
+        return $this;
+    }
+
+    public function getConfirmationToken(): ?string
+    {
+        return $this->confirmationToken;
+    }
+
+    public function setConfirmationToken(?string $confirmationToken): self
+    {
+        $this->confirmationToken = $confirmationToken;
+        return $this;
+    }
+
+    public function getIsEmailConfirmed(): bool
+    {
+        return $this->isEmailConfirmed;
+    }
+
+    public function setIsEmailConfirmed(bool $isEmailConfirmed): self
+    {
+        $this->isEmailConfirmed = $isEmailConfirmed;
         return $this;
     }
 }

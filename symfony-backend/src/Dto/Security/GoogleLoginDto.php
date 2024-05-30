@@ -2,7 +2,10 @@
 
 namespace App\Dto\Security;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class GoogleLoginDto
 {
-    public string $idToken;
+    #[Assert\NotBlank]
+    public ?string $idToken = null;
 }

@@ -7,12 +7,16 @@ use App\Dto\Security\GoogleLoginDto;
 use App\Dto\Security\UserRegisterDto;
 use App\Entity\CarMateUser;
 use App\Repository\CarMateUserRepository;
+use App\Service\EmailService;
 use App\Service\JwtTokenService;
 use AutoMapperPlus\AutoMapperInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Google_Client;
 use OpenApi\Attributes as OA;
+use Ramsey\Uuid\Rfc4122\UuidV8;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,24 +31,23 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[OA\Response(response: '500', description: 'Internal server error')]
 class SecurityController extends AbstractController
 {
-    private readonly string $googleClientId;
     public function __construct(
-        private readonly UserPasswordHasherInterface    $userPasswordHasher,
-        private readonly EntityManagerInterface         $entityManager,
-        private readonly CarMateUserRepository          $userRepository,
-        private readonly JwtTokenService                $jwtTokenService,
-        private readonly SerializerInterface            $serializer,
-        private readonly AutoMapperInterface            $autoMapper,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly EntityManagerInterface      $entityManager,
+        private readonly CarMateUserRepository       $userRepository,
+        private readonly JwtTokenService             $jwtTokenService,
+        private readonly SerializerInterface         $serializer,
+        private readonly AutoMapperInterface         $autoMapper,
+        private readonly ContainerBagInterface       $containerBag,
+        private readonly EmailService                $emailService
     )
     {
-        $this->googleClientId = getenv('GOOGLE_ID');
     }
 
     #[Route('/login-google', name: 'app_google_login', methods: ['POST'])]
-    public function loginGoogle(#[MapRequestPayload]
-                                GoogleLoginDto $dto): Response
+    public function loginGoogle(#[MapRequestPayload] GoogleLoginDto $dto): Response
     {
-        $client = new Google_Client(['client_id' => $this->googleClientId]);
+        $client = new Google_Client(['client_id' => $this->containerBag->get('google_id')]);
         $payload = $client->verifyIdToken($dto->idToken);
 
         if (!$payload) {
@@ -58,7 +61,7 @@ class SecurityController extends AbstractController
                 JsonEncoder::FORMAT);
             return new JsonResponse($json, json: true);
         }
-        
+
         if (!isset($payload['email'])) {
             throw new BadRequestException("Invalid token, email not found in payload");
         }
@@ -74,7 +77,7 @@ class SecurityController extends AbstractController
                 JsonEncoder::FORMAT);
             return new JsonResponse($json, json: true);
         }
-        
+
         if (!isset($payload['name'])) {
             throw new BadRequestException("Invalid token, name not found in payload");
         }
@@ -84,11 +87,24 @@ class SecurityController extends AbstractController
         $user->setEmail($payload['email']);
         $user->setUsername($payload['name']);
         $user->setPassword($this->userPasswordHasher->hashPassword($user, bin2hex(random_bytes(16))));
+        $user->setIsEmailConfirmed($payload['email_verified'] ?? false);
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
+        if (!$user->getIsEmailConfirmed()) {
+            $user->setConfirmationToken(Uuid::uuid6()->toString());
+        }
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        if (!$user->getIsEmailConfirmed()) {
+            $this->emailService->sendConfirmationEmail($user->getEmail(), $user->getUsername(), $user->getConfirmationToken());
+        }
+
         $json = $this->serializer->serialize($this->jwtTokenService->GenerateTokenAndRefreshForUser($user),
             JsonEncoder::FORMAT);
+
         return new JsonResponse($json, json: true);
     }
 
@@ -126,8 +142,28 @@ class SecurityController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
+        $this->emailService->sendConfirmationEmail($user->getEmail(), $user->getUsername(), $user->getConfirmationToken());
+
         $json = $this->serializer->serialize($this->jwtTokenService->GenerateTokenAndRefreshForUser($user),
             JsonEncoder::FORMAT);
         return new JsonResponse($json, Response::HTTP_CREATED, json: true);
     }
+
+    #[Route('/confirm-email/{token}', name: 'confirm_email', methods: ['GET'])]
+    public function confirm(string $token): Response
+    {
+        $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
+
+        if (!$user) {
+            throw $this->createNotFoundException('This confirmation token does not exist.');
+        }
+
+        $user->setIsEmailConfirmed(true);
+        $user->setConfirmationToken(null);
+
+        $this->entityManager->flush();
+
+        return new JsonResponse("Email confirmed", json: true);
+    }
+
 }

@@ -43,7 +43,7 @@ class CreateAdminUserCommand extends Command
         $existingUser = $this->entityManager->getRepository(CarMateUser::class)->findOneBy(['username' => $username]);
         if ($existingUser) {
             $output->writeln('User already exists!');
-            return Command::FAILURE;
+            return Command::SUCCESS;
         }
 
         $user = new CarMateUser();
@@ -51,6 +51,7 @@ class CreateAdminUserCommand extends Command
         $user->setPassword($this->userPasswordHasher->hashPassword($user, $password));
         $user->setEmail($email);
         $user->setRoles(['ROLE_ADMIN']); // Assign the admin role
+        $user->setIsEmailConfirmed(true);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
