@@ -3,8 +3,8 @@ import 'dart:developer';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:form_builder_image_picker/form_builder_image_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -16,6 +16,8 @@ class UploadPhotoForm extends StatefulWidget {
   @override
   State<UploadPhotoForm> createState() => _UploadPhotoFormState();
 }
+
+
 
 class _UploadPhotoFormState extends State<UploadPhotoForm> {
   final _formKey = GlobalKey<FormState>();
@@ -105,8 +107,8 @@ class _UploadPhotoFormState extends State<UploadPhotoForm> {
                     previewWidth: 300,
                     previewHeight: 300,
                     fit: BoxFit.cover,
-                    maxWidth: 1200,
-                    maxHeight: 1200,
+                    maxWidth: 1000,
+                    maxHeight: 1000,
                     validator: (values) {
                       if (values!.isEmpty) return 'Please select a photo';
                       return null;

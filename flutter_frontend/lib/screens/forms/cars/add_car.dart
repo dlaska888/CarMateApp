@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
-import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_frontend/screens/forms/form_helper.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
+import 'package:flutter_frontend/screens/forms/form_validator.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
 
@@ -123,7 +123,7 @@ class AddCarFormState extends State<AddCarForm> {
                       decoration: const InputDecoration(
                         labelText: 'Engine displacement',
                       ),
-                      validator: FormHelper.validateFloatInput,
+                      validator: FormValidator.validateFloatInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
@@ -206,7 +206,7 @@ class AddCarFormState extends State<AddCarForm> {
                       decoration: const InputDecoration(
                         labelText: 'Mileage',
                       ),
-                      validator: FormHelper.validateIntInput,
+                      validator: FormValidator.validateIntInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {

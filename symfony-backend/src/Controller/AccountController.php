@@ -44,7 +44,7 @@ class AccountController extends AbstractController
         private readonly SluggerInterface            $slugger,
         private readonly ValidatorInterface          $validator,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly FileRepository              $fileRepository
+        private readonly FileRepository              $fileRepository,
     )
     {
     }
@@ -52,6 +52,7 @@ class AccountController extends AbstractController
     #[Route('/me', methods: ['GET'])]
     public function getAccount(): JsonResponse
     {
+        /** @var CarMateUser $user */
         $user = $this->getUser();
         $dto = $this->autoMapper->map($user, GetUserDto::class);
         $json = $this->serializer->serialize($dto, 'json');
@@ -69,11 +70,11 @@ class AccountController extends AbstractController
 
         /** @var CarMateUser $user */
         $user = $this->getUser();
-        
+
         if (!$this->passwordHasher->isPasswordValid($user, $dto->password)) {
             throw new BadRequestException('Password is incorrect');
         }
-        
+
         $user->setUsername($dto->username);
         $this->entityManager->flush();
 
@@ -94,7 +95,7 @@ class AccountController extends AbstractController
         $user->setPassword(
             $this->passwordHasher->hashPassword(
                 $user,
-                $dto->newPassword 
+                $dto->newPassword
             )
         );
         $this->entityManager->flush();
@@ -106,11 +107,11 @@ class AccountController extends AbstractController
     public function getPhoto(Uuid $profilePhotoId): Response
     {
         $user = $this->getUser();
-        
+
         if (!$user->getPhoto()) {
             throw new BadRequestException('No photo uploaded');
         }
-        
+
         $photo = $this->fileRepository->find($profilePhotoId);
         if (!$photo) {
             throw new NotFoundHttpException('No photo found');

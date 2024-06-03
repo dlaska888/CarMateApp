@@ -43,7 +43,7 @@ class MaintenanceInfo extends StatelessWidget {
                   ),
                   ConstrainedBox(
                     constraints:
-                        const BoxConstraints(maxHeight: 400, maxWidth: 500),
+                        const BoxConstraints(maxHeight: 600, maxWidth: 500),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -70,12 +70,28 @@ class MaintenanceInfo extends StatelessWidget {
                           readOnly: true,
                         ),
                         TextFormField(
+                          initialValue: _maintenance.mileageInterval?.toString() ?? 'Not provided',
+                          decoration: const InputDecoration(
+                            labelText: 'Mileage Interval',
+                          ),
+                          readOnly: true,
+                        ),
+                        TextFormField(
                           initialValue:
                               _maintenance.dueDate != null ? _maintenance.dueDate.toString().split(" ")[0] : 'Not provided',
                           decoration: const InputDecoration(
                               labelText: 'Due Date',
                               filled: true,
                               prefixIcon: Icon(Icons.calendar_today)),
+                          readOnly: true,
+                        ),
+                        TextFormField(
+                          initialValue: _maintenance.dateInterval != null
+                              ? _maintenance.dateInterval.toString()
+                              : 'Not provided',
+                          decoration: const InputDecoration(
+                            labelText: 'Date Interval',
+                          ),
                           readOnly: true,
                         ),
                         TextFormField(

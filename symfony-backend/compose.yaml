@@ -34,7 +34,12 @@ services:
         published: ${HTTP3_PORT:-443}
         protocol: udp
     depends_on:
-      - database
+      rabbitmq:
+        condition: service_healthy
+      database:
+        condition: service_started
+    networks:
+      - api
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
@@ -54,14 +59,47 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
+    networks:
+      - api
 ###< doctrine/doctrine-bundle ###
-
+  rabbitmq:
+    image: rabbitmq:3-management
+    volumes:
+      - rmqconf:/etc/rabbitmq
+      - rmqdata:/var/lib/rabbitmq/mnesia
+      - rmqlogs:/var/log/rabbitmq
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "${RABBITMQ_MANAGER_PORT}:15672"
+      - "${RABBITMQ_PORT}:5672"
+    networks:
+      - api
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "${MAILHOG_UI_PORT}:8025"
+      - "${MAILHOG_SMTP_PORT}:1025"
+    networks:
+      - api
 volumes:
   caddy_data:
   caddy_config:
+  rmqconf:
+  rmqdata:
+  rmqlogs:
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
 
 ###> doctrine/doctrine-bundle ###
   database_data:
 ###< doctrine/doctrine-bundle ###
+networks:
+  api:

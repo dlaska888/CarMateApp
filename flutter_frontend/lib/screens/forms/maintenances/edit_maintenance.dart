@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car.dart';
 import 'package:flutter_frontend/models/maintenance.dart';
-import 'package:flutter_frontend/notification_service.dart';
-import 'package:flutter_frontend/screens/forms/form_helper.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
+import 'package:flutter_frontend/screens/forms/form_validator.dart';
+import 'package:flutter_frontend/screens/forms/interval_picker.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:http/http.dart' as http;
+import 'package:iso8601_duration/iso8601_duration.dart';
 
 class EditMaintenanceForm extends StatefulWidget {
   final Maintenance maintenance;
@@ -25,7 +27,8 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
   final _descriptionFocusNode = FocusNode();
   late Maintenance _maintenance;
   late Car _car;
-  late TextEditingController dueDateController;
+  late TextEditingController _dueDateController;
+  late TextEditingController _dateIntervalController;
   var _isLoading = false;
 
   void _submit() {
@@ -58,8 +61,10 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
     super.initState();
     _maintenance = widget.maintenance;
     _car = widget.car;
-    dueDateController = TextEditingController(
+    _dueDateController = TextEditingController(
         text: _maintenance.dueDate?.toString().split(" ")[0]);
+    _dateIntervalController =
+        TextEditingController(text: _maintenance.dateInterval?.toString());
   }
 
   @override
@@ -85,7 +90,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
             child: Form(
               key: _formKey,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 500),
+                constraints: const BoxConstraints(maxHeight: 700),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -130,7 +135,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       decoration: const InputDecoration(
                         labelText: 'Due Mileage',
                       ),
-                      validator: FormHelper.validateIntInput,
+                      validator: FormValidator.validateIntInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {
@@ -140,12 +145,26 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       },
                     ),
                     TextFormField(
+                      initialValue: _maintenance.mileageInterval?.toString(),
+                      decoration: const InputDecoration(
+                        labelText: 'Mileage Interval',
+                      ),
+                      validator: FormValidator.validateIntInput,
+                      keyboardType: TextInputType.number,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      onSaved: (value) {
+                        setState(() {
+                          _maintenance.mileageInterval = int.tryParse(value!);
+                        });
+                      },
+                    ),
+                    TextFormField(
                       decoration: const InputDecoration(
                           labelText: 'Due Date',
                           filled: true,
                           prefixIcon: Icon(Icons.calendar_today)),
                       readOnly: true,
-                      controller: dueDateController,
+                      controller: _dueDateController,
                       onTap: () async {
                         var picked = await showDatePicker(
                             context: context,
@@ -153,7 +172,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                             lastDate: DateTime(2101));
                         if (picked != null) {
                           setState(() {
-                            dueDateController.text =
+                            _dueDateController.text =
                                 picked.toString().split(" ")[0];
                           });
                         }
@@ -161,8 +180,34 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       onSaved: (value) {
                         setState(() {
                           _maintenance.dueDate =
-                              DateTime.tryParse(dueDateController.text);
+                              DateTime.tryParse(_dueDateController.text);
                         });
+                      },
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                          labelText: 'Date Interval',
+                          filled: true,
+                          prefixIcon: Icon(Icons.cached)),
+                      readOnly: true,
+                      controller: _dateIntervalController,
+                      onTap: () async {
+                        var picked =
+                            await IntervalPicker.showDateIntervalPicker(
+                                context: context);
+                        if (picked == "clear") {
+                          setState(() {
+                            _dateIntervalController.text = "";
+                            _maintenance.dateInterval = null;
+                          });
+                        } else if (picked != null) {
+                          final date = ISODurationConverter()
+                              .parseString(isoDurationString: picked);
+                          setState(() {
+                            _dateIntervalController.text = date.toString();
+                            _maintenance.dateInterval = date;
+                          });
+                        }
                       },
                     ),
                     TextFormField(
@@ -170,7 +215,7 @@ class EditMaintenanceFormState extends State<EditMaintenanceForm> {
                       decoration: const InputDecoration(
                         labelText: 'Cost',
                       ),
-                      validator: FormHelper.validateFloatInput,
+                      validator: FormValidator.validateFloatInput,
                       keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       onSaved: (value) {

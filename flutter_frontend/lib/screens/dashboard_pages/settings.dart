@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:flutter_frontend/models/car_mate_user.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/dashboard_pages/components/user_avatar.dart';
 import 'package:flutter_frontend/screens/forms/account/change_password.dart';
 import 'package:flutter_frontend/screens/forms/account/change_username.dart';
@@ -20,7 +20,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late CarMateUser _user;
+  late Future<CarMateUser> _futureUser;
 
   Future<CarMateUser> fetchUser() {
     return ApiClient.sendRequest("${ApiEndpoints.accountEndpoint}/me",
@@ -34,11 +34,26 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void addPhoto() {
-    fetchUser().then((user) {
-      setState(() {
-        _user = user;
-      });
+    setState(() {
+      _futureUser = fetchUser();
     });
+  }
+
+  void resendVerificationEmail() {
+    ApiClient.sendRequest("${ApiEndpoints.baseUrl}/resend-confirmation-email",
+            methodFun: http.post, authorizedRequest: true)
+        .then((response) {
+      NotificationService.showNotification("Verification email sent",
+          type: MessageType.ok);
+    }).catchError((error) {
+      NotificationService.showNotification("$error", type: MessageType.error);
+    });
+  }
+
+  @override
+  initState() {
+    super.initState();
+    _futureUser = fetchUser();
   }
 
   @override
@@ -47,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder(
-      future: fetchUser(),
+      future: _futureUser,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           log("Error loading settings: ${snapshot.error}");
@@ -62,7 +77,8 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         }
 
-        _user = snapshot.data as CarMateUser;
+        final user = snapshot.data as CarMateUser;
+        log("User: ${user.isGoogleAuth}");
         return SingleChildScrollView(
           child: Column(
             mainAxisAlignment: screenWidth > 768
@@ -112,15 +128,15 @@ class _SettingsPageState extends State<SettingsPage> {
                                                 '${ApiEndpoints.accountEndpoint}/profile-photo',
                                                 addPhoto));
                                       },
-                                      child: UserAvatar(_user)),
+                                      child: UserAvatar(user)),
                                   const SizedBox(height: 32),
                                   Column(children: [
-                                    Text(_user.username,
+                                    Text(user.username,
                                         style: TextStyle(
                                             fontSize: 32.0,
                                             fontWeight: FontWeight.bold,
                                             color: primary)),
-                                    Text(_user.email,
+                                    Text(user.email,
                                         style: TextStyle(
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.bold,
@@ -144,36 +160,36 @@ class _SettingsPageState extends State<SettingsPage> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: !user.isGoogleAuth ? () {
                                   FormModal(context).showModal(
                                       ChangeUsernameForm(
                                           () => {setState(() {})}));
-                                },
+                                } : null,
                                 child: const Text("Change username"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: !user.isGoogleAuth ? () {
                                   FormModal(context).showModal(
                                       ChangePasswordForm(
                                           () => {setState(() {})}));
-                                },
+                                } : null,
                                 child: const Text("Change Password"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: !user.isEmailConfirmed ? () { resendVerificationEmail(); } : null,
                                 child: const Text("Resend Verification Email"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: !user.isGoogleAuth ?  () {} : null,
                                 child: const Text("Enable 2FA"),
                               ),
                             ),

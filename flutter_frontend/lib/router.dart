@@ -1,4 +1,4 @@
-import 'package:flutter_frontend/api_client.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
 import 'package:flutter_frontend/screens/dashboard.dart';
 import 'package:flutter_frontend/screens/index.dart';
 import 'package:flutter_frontend/screens/login.dart';

@@ -1,13 +1,15 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_frontend/api_client.dart';
-import 'package:flutter_frontend/api_endpoints.dart';
-import 'package:flutter_frontend/notification_service.dart';
+import 'package:flutter_frontend/helpers/api_client.dart';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
+import 'package:flutter_frontend/helpers/google_auth_manager.dart';
+import 'package:flutter_frontend/helpers/notification_service.dart';
 import 'package:flutter_frontend/screens/forms/common_validators.dart';
 import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:sign_in_button/sign_in_button.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -17,6 +19,7 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  final _googleAuthManager = GoogleAuthManager();
   final _username = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -60,6 +63,28 @@ class _RegisterState extends State<Register> {
     }
   }
 
+  void _googleLogin(BuildContext context) {
+    setState(() {
+      _isLoading = true;
+    });
+
+    _googleAuthManager.loginWithGoogle().then((success) {
+      if (success) {
+        context.go('/dashboard');
+      } else {
+        NotificationService.showNotification("Error logging in with google",
+            type: MessageType.error);
+      }
+    }).catchError((error) {
+      NotificationService.showNotification("Error logging in with google",
+          type: MessageType.error);
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Color primary = Theme.of(context).primaryColor;
@@ -87,8 +112,7 @@ class _RegisterState extends State<Register> {
                   color: primaryLight,
                   borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                 ),
-                constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height / 1.5),
+                constraints: const BoxConstraints(minHeight: 575),
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,6 +161,9 @@ class _RegisterState extends State<Register> {
                       },
                     ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(250, 0),
+                      ),
                       onPressed: _submit,
                       child: _isLoading
                           ? const CircularProgressIndicator()
@@ -144,13 +171,26 @@ class _RegisterState extends State<Register> {
                     ),
                     RichText(
                       text: TextSpan(
-                        text: "Already have an account? Sign in",
+                        text: "Already have an account? ",
                         style: const TextStyle(
                             color: Colors.white, fontSize: 16.0),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => context.go('/login'),
+                        children: [
+                          TextSpan(
+                            text: "Sign in",
+                            style: TextStyle(
+                              color: primary,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => context.go('/login'),
+                          ),
+                        ],
                       ),
                     ),
+                    SignInButton(Buttons.google, onPressed: () async {
+                      _googleLogin(context);
+                    }),
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter_frontend/api_endpoints.dart';
+import 'dart:io';
+import 'package:flutter_frontend/helpers/api_endpoints.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -17,8 +18,8 @@ class ApiClient {
     try {
       final url = Uri.parse(path);
       final headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        HttpHeaders.acceptHeader: 'application/json',
+        HttpHeaders.contentTypeHeader: 'application/json',
       };
 
       if (authorizedRequest) {
@@ -70,7 +71,7 @@ class ApiClient {
     return result;
   }
 
-  static Future login(String jwt, String refreshToken) async {
+  static Future<void> login(String jwt, String refreshToken) async {
     await _storage.write(key: _jwtKey, value: jwt);
     await _storage.write(key: _jwtRefreshKey, value: refreshToken);
   }

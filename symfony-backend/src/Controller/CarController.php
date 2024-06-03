@@ -57,7 +57,7 @@ class CarController extends AbstractController
 
         $query = $this->entityManager->createQueryBuilder()
             ->select('c')
-            ->from('App\Entity\Car', 'c')
+            ->from(Car::class, 'c')
             ->where('c.user = :user')
             ->setParameter('user', $user)
             ->getQuery();
@@ -90,7 +90,7 @@ class CarController extends AbstractController
         $getCarDto = $this->autoMapper->map($car, GetCarDto::class);
         $json = $this->serializer->serialize($getCarDto, JsonEncoder::FORMAT);
 
-        return new JsonResponse($json, Response::HTTP_CREATED, json: true);
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
     }
 
     #[Route(methods: ['POST'])]
@@ -121,7 +121,7 @@ class CarController extends AbstractController
         $getCarDto = $this->autoMapper->map($car, GetCarDto::class);
         $json = $this->serializer->serialize($getCarDto, JsonEncoder::FORMAT);
 
-        return new JsonResponse($json, Response::HTTP_CREATED, json: true);
+        return new JsonResponse($json, Response::HTTP_OK, json: true);
     }
 
     #[Route('/{id}', methods: ['DELETE'])]

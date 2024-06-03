@@ -13,6 +13,10 @@ class GetUserDto
     public ?string $email = null;
 
     public ?array $roles = null;
+    
+    public bool $isEmailConfirmed = false;
+    
+    public bool $isGoogleAuth = false;
 
     public ?Uuid $photoId = null;
 }

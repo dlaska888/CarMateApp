@@ -26,8 +26,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		composer install --prefer-dist --no-progress --no-interaction
 	fi
 	
-  php bin/console lexik:jwt:generate-keypair --skip-if-exists
-	
 	if grep -q ^DATABASE_URL= .env; then
 		echo "Waiting for database to be ready..."
 		ATTEMPTS_LEFT_TO_REACH_DATABASE=60
@@ -52,8 +50,12 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 
 		if [ "$( find ./migrations -iname '*.php' -print -quit )" ]; then
 			php bin/console doctrine:migrations:migrate --no-interaction
+			php bin/console app:create-admin-user admin admin admin@admin.com
 		fi
 	fi
+
+  php bin/console lexik:jwt:generate-keypair --skip-if-exists
+  php bin/console messenger:consume async &
 
 	setfacl -R -m u:www-data:rwX -m u:"$(whoami)":rwX var
 	setfacl -dR -m u:www-data:rwX -m u:"$(whoami)":rwX var
