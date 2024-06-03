@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -148,6 +149,21 @@ class SecurityController extends AbstractController
             JsonEncoder::FORMAT);
         return new JsonResponse($json, Response::HTTP_CREATED, json: true);
     }
+    
+    #[Route('/resend-confirmation-email', name: 'resend_confirmation_email', methods: ['POST'])]
+    public function resendConfirmationEmail(): Response
+    {
+        /** @var CarMateUser $user */
+        $user = $this->getUser();
+        
+        if ($user->getIsEmailConfirmed()) {
+            throw new BadRequestException("Email already confirmed");
+        }
+        
+        $this->emailService->sendConfirmationEmail($user->getEmail(), $user->getUsername(), $user->getConfirmationToken());
+        
+        return new JsonResponse("Email sent", Response::HTTP_OK);
+    }
 
     #[Route('/confirm-email/{token}', name: 'confirm_email', methods: ['GET'])]
     public function confirm(string $token): Response
@@ -155,7 +171,7 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
 
         if (!$user) {
-            throw $this->createNotFoundException('This confirmation token does not exist.');
+            return new RedirectResponse($this->containerBag->get('frontend_url') . '/login');
         }
 
         $user->setIsEmailConfirmed(true);
@@ -163,7 +179,7 @@ class SecurityController extends AbstractController
 
         $this->entityManager->flush();
 
-        return new JsonResponse("Email confirmed", json: true);
+        return new RedirectResponse($this->containerBag->get('frontend_url') . '/login');
     }
 
 }

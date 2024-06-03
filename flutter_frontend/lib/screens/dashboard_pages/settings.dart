@@ -39,6 +39,17 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  void resendVerificationEmail() {
+    ApiClient.sendRequest("${ApiEndpoints.baseUrl}/resend-confirmation-email",
+            methodFun: http.post, authorizedRequest: true)
+        .then((response) {
+      NotificationService.showNotification("Verification email sent",
+          type: MessageType.ok);
+    }).catchError((error) {
+      NotificationService.showNotification("$error", type: MessageType.error);
+    });
+  }
+
   @override
   initState() {
     super.initState();
@@ -67,6 +78,7 @@ class _SettingsPageState extends State<SettingsPage> {
         }
 
         final user = snapshot.data as CarMateUser;
+        log("User: ${user.isGoogleAuth}");
         return SingleChildScrollView(
           child: Column(
             mainAxisAlignment: screenWidth > 768
@@ -148,36 +160,36 @@ class _SettingsPageState extends State<SettingsPage> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: !user.isGoogleAuth ? () {
                                   FormModal(context).showModal(
                                       ChangeUsernameForm(
                                           () => {setState(() {})}));
-                                },
+                                } : null,
                                 child: const Text("Change username"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {
+                                onPressed: !user.isGoogleAuth ? () {
                                   FormModal(context).showModal(
                                       ChangePasswordForm(
                                           () => {setState(() {})}));
-                                },
+                                } : null,
                                 child: const Text("Change Password"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: !user.isEmailConfirmed ? () { resendVerificationEmail(); } : null,
                                 child: const Text("Resend Verification Email"),
                               ),
                             ),
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: !user.isGoogleAuth ?  () {} : null,
                                 child: const Text("Enable 2FA"),
                               ),
                             ),

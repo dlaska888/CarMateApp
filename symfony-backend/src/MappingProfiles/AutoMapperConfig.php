@@ -31,7 +31,8 @@ class AutoMapperConfig implements AutoMapperConfiguratorInterface
 
         $config->registerMapping(CarMateUser::class, GetUserDto::class)
             ->forMember('roles', fn(CarMateUser $user) => $user->getRoles())
-            ->forMember('photoId', fn(CarMateUser $user) => $user->getPhoto()?->getId());
+            ->forMember('photoId', fn(CarMateUser $user) => $user->getPhoto()?->getId())
+            ->forMember('isGoogleAuth', fn(CarMateUser $user) => $user->getGoogle() !== null);
 
         $config->registerMapping(UserRegisterDto::class, CarMateUser::class)
             ->forMember('confirmationToken', fn() => Uuid::uuid6()->toString());

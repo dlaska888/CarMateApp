@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20240530172132 extends AbstractMigration
+final class Version20240603140438 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -22,10 +22,8 @@ final class Version20240530172132 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('DROP SEQUENCE messenger_messages_id_seq CASCADE');
         $this->addSql('DROP TABLE messenger_messages');
-        $this->addSql('ALTER TABLE car ADD confirmation_token VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE car ADD is_email_confirmed BOOLEAN NOT NULL');
         $this->addSql('ALTER TABLE car_mate_user ADD confirmation_token VARCHAR(255) DEFAULT NULL');
-        $this->addSql('ALTER TABLE car_mate_user ADD is_email_confirmed BOOLEAN NOT NULL DEFAULT FALSE');
+        $this->addSql('ALTER TABLE car_mate_user ADD is_email_confirmed BOOLEAN NOT NULL');
     }
 
     public function down(Schema $schema): void
@@ -40,8 +38,6 @@ final class Version20240530172132 extends AbstractMigration
         $this->addSql('COMMENT ON COLUMN messenger_messages.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN messenger_messages.available_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('COMMENT ON COLUMN messenger_messages.delivered_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('ALTER TABLE car DROP confirmation_token');
-        $this->addSql('ALTER TABLE car DROP is_email_confirmed');
         $this->addSql('ALTER TABLE car_mate_user DROP confirmation_token');
         $this->addSql('ALTER TABLE car_mate_user DROP is_email_confirmed');
     }

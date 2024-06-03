@@ -10,6 +10,7 @@ parameters:
     system_name: 'CarMateApp'
     google_id: '%env(GOOGLE_ID)%'
     refresh_token_ttl: '%env(int:REFRESH_TOKEN_TTL)%'
+    frontend_url: '%env(FRONTEND_SERVER_NAME)%'
 services:
     # default configuration for services in *this* file
     _defaults:
